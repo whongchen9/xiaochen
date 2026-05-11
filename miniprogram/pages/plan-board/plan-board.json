@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "计划书",
-  "usingComponents": {}
+  "usingComponents": {
+    "xiaochen-assistant": "/components/xiaochen-assistant/xiaochen-assistant"
+  }
 }

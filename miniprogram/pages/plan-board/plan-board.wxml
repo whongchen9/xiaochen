@@ -177,4 +177,6 @@
     <text class="plan-pending-stranger-txt">陌生人协作群已创建，可进入会话页查看匹配卡片，或直接进入群聊。</text>
     <button class="plan-pending-stranger-btn" type="primary" bindtap="enterPendingStrangerFromPlan">进入协作群</button>
   </view>
+
+  <xiaochen-assistant id="xiaochen-assistant" />
 </view>
