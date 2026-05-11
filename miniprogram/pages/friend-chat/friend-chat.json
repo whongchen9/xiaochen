@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "聊天",
-  "usingComponents": {}
+  "usingComponents": {
+    "xiaochen-assistant": "/components/xiaochen-assistant/xiaochen-assistant"
+  }
 }
