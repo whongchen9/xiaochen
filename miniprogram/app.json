@@ -1,0 +1,59 @@
+{
+  "pages": [
+    "pages/conversations/conversations",
+    "pages/chat/chat",
+    "pages/plan-board/plan-board",
+    "pages/friends/friends",
+    "pages/friend-chat/friend-chat",
+    "pages/collab-history/collab-history",
+    "pages/profile/profile",
+    "pages/user-preview/user-preview",
+    "pages/notify/notify",
+    "pages/address/address",
+    "pages/settings/settings",
+    "pages/about/about"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#2f6cf6",
+    "navigationBarTitleText": "即DAO",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f6fa",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#9ca3af",
+    "selectedColor": "#2f6cf6",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/conversations/conversations",
+        "text": "会话",
+        "iconPath": "images/tab/gray.png",
+        "selectedIconPath": "images/tab/blue.png"
+      },
+      {
+        "pagePath": "pages/notify/notify",
+        "text": "通知",
+        "iconPath": "images/tab/gray.png",
+        "selectedIconPath": "images/tab/blue.png"
+      },
+      {
+        "pagePath": "pages/friends/friends",
+        "text": "发现",
+        "iconPath": "images/tab/gray.png",
+        "selectedIconPath": "images/tab/blue.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/tab/gray.png",
+        "selectedIconPath": "images/tab/blue.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "cloud": true
+}

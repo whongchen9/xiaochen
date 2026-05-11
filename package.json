@@ -1,0 +1,9 @@
+{
+  "name": "xiaochen-dao",
+  "private": true,
+  "description": "即DAO 微信小程序（根目录含 miniprogram/ 与 cloudfunctions/）",
+  "scripts": {
+    "bootstrap": "npm install --prefix cloudfunctions/service",
+    "setup": "npm run bootstrap"
+  }
+}

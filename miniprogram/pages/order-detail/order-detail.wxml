@@ -1,0 +1,95 @@
+<view class="page">
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+
+  <block wx:elif="{{order}}">
+    <view class="role-banner" wx:if="{{order.myRole === 'runner'}}">你正在以「跑腿」身份查看此单</view>
+    <view class="card">
+      <view class="row">
+        <text class="label">订单号</text>
+        <text class="value">{{order.orderNo}}</text>
+      </view>
+      <view class="row">
+        <text class="label">状态</text>
+        <text class="status status-{{order.statusKey}}">{{order.statusText}}</text>
+      </view>
+      <view class="row" wx:if="{{order.runnerOpenid}}">
+        <text class="label">骑手</text>
+        <text class="value">已接单，请约定沟通方式与时间</text>
+      </view>
+      <view class="row">
+        <text class="label">服务类型</text>
+        <text class="value">{{order.serviceType}}</text>
+      </view>
+      <view class="row">
+        <text class="label">起点</text>
+        <text class="value">{{order.startAddr}}</text>
+      </view>
+      <view class="row">
+        <text class="label">终点</text>
+        <text class="value">{{order.endAddr}}</text>
+      </view>
+      <view class="row">
+        <text class="label">时效</text>
+        <text class="value">{{order.urgent ? '加急' : '普通'}}</text>
+      </view>
+      <view class="row total">
+        <text class="label">费用</text>
+        <text class="price">¥{{order.price}}</text>
+      </view>
+      <view class="row">
+        <text class="label">创建时间</text>
+        <text class="value muted">{{order.createTime}}</text>
+      </view>
+    </view>
+
+    <!-- 操作区 -->
+    <view class="actions" wx:if="{{!acting}}">
+      <button
+        wx:if="{{order.myRole === 'customer' && (order.statusKey === 'pending_pay' || order.statusKey === 'matching')}}"
+        class="btn danger"
+        bindtap="cancelOrderTap"
+      >取消订单</button>
+
+      <button
+        wx:if="{{order.myRole === 'customer' && order.statusKey === 'pending_pay'}}"
+        class="btn primary"
+        bindtap="goPayHelp"
+      >去支付（对话页卡片）</button>
+
+      <button
+        wx:if="{{order.myRole === 'runner' && order.statusKey === 'delivering'}}"
+        class="btn primary"
+        bindtap="markDeliveredTap"
+      >标记已送达</button>
+
+      <button
+        wx:if="{{order.myRole === 'customer' && order.statusKey === 'pending_confirm'}}"
+        class="btn primary"
+        bindtap="confirmCompleteTap"
+      >确认完成</button>
+    </view>
+
+    <!-- 评价（下单人、已完成、未评） -->
+    <view class="rating-box" wx:if="{{order.myRole === 'customer' && order.statusKey === 'completed' && !order.rated}}">
+      <view class="rating-title">为本次服务评分</view>
+      <view class="rating-stars">
+        <text
+          class="star"
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:key="*this"
+          bindtap="pickRating"
+          data-score="{{item}}"
+        >{{ratingScore >= item ? '⭐' : '☆'}}</text>
+      </view>
+      <button class="btn primary slim" bindtap="submitRatingTap" disabled="{{!ratingScore}}">提交评价</button>
+    </view>
+
+    <view class="rated-tip" wx:if="{{order.myRole === 'customer' && order.statusKey === 'completed' && order.rated}}">
+      你已评价过本单，感谢反馈。
+    </view>
+  </block>
+
+  <view class="empty" wx:else>
+    <text>暂无订单数据</text>
+  </view>
+</view>

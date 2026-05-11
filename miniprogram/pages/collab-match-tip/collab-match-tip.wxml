@@ -1,0 +1,33 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{errMsg}}" class="state err">{{errMsg}}</view>
+  <block wx:else>
+    <view class="card">
+      <text class="kicker">与您简介相近的协作需求</text>
+      <text class="title">{{planTitle}}</text>
+      <text class="room-line">群：{{roomTitle}}</text>
+      <text class="summary" selectable>{{planSummary || '（暂无摘要，可进群查看计划书）'}}</text>
+    </view>
+
+    <view wx:if="{{isOwner}}" class="hint-card">您是发起人，可在计划书页查看推荐成员并发出邀请。</view>
+
+    <block wx:else>
+      <view class="draft-box" wx:if="{{replyDraft}}">
+        <text class="draft-label">回复草稿（需您亲自发送）</text>
+        <text class="draft-text" selectable>{{replyDraft}}</text>
+      </view>
+
+      <view class="actions">
+        <button class="btn secondary" loading="{{draftLoading}}" bindtap="onSuggestDraft">生成回复草稿</button>
+        <button
+          class="btn secondary"
+          disabled="{{!replyDraft}}"
+          bindtap="onCopyDraft"
+        >复制草稿</button>
+        <button class="btn primary" loading="{{willingLoading}}" bindtap="onWilling">我愿意被推荐给发起人</button>
+        <button class="btn secondary" bindtap="onEnterRoom">进入协作群</button>
+      </view>
+      <text class="foot-note">平台不会代您发消息；复制草稿后可在群内粘贴发送。</text>
+    </block>
+  </block>
+</view>

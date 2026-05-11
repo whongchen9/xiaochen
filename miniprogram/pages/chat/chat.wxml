@@ -1,0 +1,261 @@
+<!-- AI 聊天主页：置顶会话即模版；协作计划走计划书(P)；协作群仅由陌生人匹配等流程建群 -->
+<view class="page-container">
+  <view class="stranger-weak-strip" wx:if="{{!activeRoomId && strangerWeakStrip}}">
+    <text>{{strangerWeakStrip}}</text>
+  </view>
+
+  <view
+    class="stranger-invite-bar"
+    wx:if="{{!activeRoomId && strangerInviteBar && !strangerDock.show}}"
+  >
+    <view class="stranger-invite-main" bindtap="onStrangerInviteBarTap">
+      <text class="stranger-invite-title">收到协作邀请</text>
+      <text class="stranger-invite-sub">对方计划摘要已就绪，点此查看或同意</text>
+    </view>
+    <text class="stranger-invite-decline" catchtap="onDeclineStrangerInvite">拒绝</text>
+  </view>
+
+  <!-- 未进入对话流时：落地引导（避免整页空白） -->
+  <view class="chat-landing" wx:if="{{!activeRoomId && !aiCollaborationStarted}}">
+    <view class="chat-landing-body">
+      <text class="chat-landing-kicker">{{layoutDiscoverMode ? '发现页' : '协作'}}</text>
+      <text class="chat-landing-title">{{layoutDiscoverMode ? '用对话调整版面' : '先把需求说清楚'}}</text>
+      <text class="chat-landing-desc">{{layoutDiscoverMode ? '进入后直接在底部输入你的排版想法；保存后返回「发现」即可预览。' : '和小陈助手对话整理要点；需要时打开右下角「P」查看计划书。陌生人匹配在计划书与通知里推进。'}}</text>
+    </view>
+    <view class="chat-landing-footer">
+      <view class="chat-landing-btn" bindtap="onLandingStart" hover-class="chat-landing-btn-hover" hover-stay-time="80">
+        <text class="chat-landing-btn-plus">+</text>
+        <text>{{layoutDiscoverMode ? '开始使用' : '开始协作对话'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI 消息列表 -->
+  <scroll-view
+    wx:if="{{!activeRoomId && aiCollaborationStarted}}"
+    class="message-list"
+    scroll-y="true"
+    scroll-into-view="{{scrollToId}}"
+    scroll-with-animation="true"
+    refresher-enabled="{{aiCollaborationStarted}}"
+    refresher-triggered="{{_aiPullRefreshing}}"
+    bindrefresherrefresh="onAiPullRefresh"
+  >
+    <block wx:for="{{messages}}" wx:key="id">
+      <view class="msg-row msg-ai" wx:if="{{item.role === 'ai'}}">
+        <view class="msg-avatar msg-avatar-ai"><text class="msg-avatar-ai-txt">助手</text></view>
+        <view class="msg-body">
+          <view class="msg-bubble msg-bubble-ai">
+            <text class="msg-text">{{item.content}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="msg-row msg-user" wx:elif="{{item.role === 'user'}}">
+        <view class="msg-body">
+          <view class="msg-bubble msg-bubble-user">
+            <image wx:if="{{item.imageFileId}}" class="ai-user-msg-img" src="{{item.imageFileId}}" mode="widthFix"></image>
+            <text class="msg-text" wx:if="{{item.content}}">{{item.content}}</text>
+          </view>
+        </view>
+        <view class="msg-avatar msg-avatar-user">
+          <image wx:if="{{settingsUser.avatar}}" class="msg-avatar-img" src="{{settingsUser.avatar}}" mode="aspectFill"></image>
+          <text wx:else>👤</text>
+        </view>
+      </view>
+
+      <view class="msg-system" wx:elif="{{item.role === 'system'}}">
+        <text>{{item.content}}</text>
+      </view>
+    </block>
+
+    <view class="loading-dot" wx:if="{{isLoading}}"><text class="dot">.</text><text class="dot">.</text><text class="dot">.</text></view>
+    <view id="msg-bottom"></view>
+  </scroll-view>
+
+  <!-- 本轮云侧执行轨迹（对话模型 / 合并计划书等） -->
+  <view
+    class="ai-trace-wrap"
+    wx:if="{{!activeRoomId && aiCollaborationStarted && aiTraceSteps.length}}"
+  >
+    <text class="ai-trace-title">本轮执行</text>
+    <view class="ai-trace-list">
+      <view class="ai-trace-row" wx:for="{{aiTraceSteps}}" wx:key="id">
+        <text class="ai-trace-mark">{{item.skipped ? '○' : (item.ok === false ? '✗' : '✓')}}</text>
+        <view class="ai-trace-main">
+          <text class="ai-trace-label">{{item.label}}</text>
+          <text wx:if="{{item.detail}}" class="ai-trace-detail">{{item.detail}}</text>
+        </view>
+        <text wx:if="{{item.ms != null}}" class="ai-trace-ms">{{item.ms}}ms</text>
+        <text wx:elif="{{item.skipped}}" class="ai-trace-ms">—</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="stranger-dock" wx:if="{{!activeRoomId && strangerDock.show}}">
+    <view class="stranger-dock-head">
+      <text class="stranger-dock-title">陌生人协作匹配</text>
+      <text class="stranger-dock-dismiss" bindtap="dismissStrangerDock">收起</text>
+    </view>
+    <view class="stranger-dock-meta">
+      <text wx:if="{{strangerDock.surface}}">状态 {{strangerDock.surface}}</text>
+      <text wx:if="{{!strangerDock.revealed}}"> · {{strangerDock.revealLeftSec}}s 后揭晓头像</text>
+      <text wx:else> · 已揭晓，点头像看公开主页</text>
+    </view>
+    <view class="stranger-avatars">
+      <view class="stranger-av me">
+        <image wx:if="{{settingsUser.avatar}}" class="stranger-av-img" src="{{settingsUser.avatar}}" mode="aspectFill" />
+        <text wx:else class="stranger-av-ph">我</text>
+      </view>
+      <view class="stranger-av peer {{strangerDock.revealed ? '' : 'peer-mask'}}" bindtap="openStrangerPeerProfile">
+        <image
+          wx:if="{{strangerDock.revealed && strangerDock.peerAvatarUrl}}"
+          class="stranger-av-img"
+          src="{{strangerDock.peerAvatarUrl}}"
+          mode="aspectFill"
+        />
+        <text wx:elif="{{strangerDock.revealed}}" class="stranger-av-ph">{{strangerDock.peerNickChar}}</text>
+        <text wx:else class="stranger-av-ph">?</text>
+      </view>
+    </view>
+    <swiper
+      class="stranger-plan-swiper"
+      current="{{strangerDock.swipeCurrent}}"
+      bindchange="onStrangerDockSwipe"
+      circular="{{false}}"
+    >
+      <swiper-item>
+        <view class="stranger-plan-card">
+          <text class="stranger-plan-label">我的计划</text>
+          <text class="stranger-plan-t">{{strangerDock.mineTitle}}</text>
+          <text class="stranger-plan-s">{{strangerDock.revealed ? strangerDock.mineSummaryFull : strangerDock.mineSummaryShort}}</text>
+        </view>
+      </swiper-item>
+      <swiper-item>
+        <view class="stranger-plan-card">
+          <text class="stranger-plan-label">对方计划</text>
+          <text class="stranger-plan-t">{{strangerDock.peerTitle}}</text>
+          <text class="stranger-plan-s">{{strangerDock.revealed ? strangerDock.peerSummaryFull : strangerDock.peerSummaryShort}}</text>
+        </view>
+      </swiper-item>
+    </swiper>
+    <text class="stranger-swiper-hint">左右滑动查看双方计划；下拉消息列表可重新匹配（A6a）</text>
+    <button class="stranger-enter-room" type="primary" bindtap="enterStrangerPendingRoom">进入协作群</button>
+  </view>
+
+  <!-- 协作会话：仅消息流 + 底栏（计划与匹配在计划书页 P） -->
+  <scroll-view wx:elif="{{activeRoomId}}" class="message-list" scroll-y="true" scroll-into-view="{{scrollToId}}" scroll-with-animation="true">
+    <view class="room-chat-bar">
+      <text class="room-chat-back" bindtap="backToRoomList">‹ 返回</text>
+      <text class="room-chat-title">{{activeRoomTitle}}</text>
+      <button class="room-share-btn" open-type="share">邀请成员</button>
+    </view>
+
+    <block wx:for="{{roomMessages}}" wx:key="id">
+      <view class="msg-row msg-ai room-msg-digest-row" wx:if="{{item.isMatchDigest || item.msgType === 'match_digest'}}">
+        <view class="msg-avatar msg-avatar-ai">💡</view>
+        <view class="msg-body">
+          <view class="msg-bubble msg-bubble-ai room-match-digest-bubble">
+            <text class="msg-text room-match-digest-text">{{item.content}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="msg-row msg-ai" wx:elif="{{item.isPlanCard || item.msgType === 'plan_card'}}">
+        <view class="msg-avatar msg-avatar-ai">📋</view>
+        <view class="msg-body">
+          <view class="room-plan-card-mini" bindtap="openPlanBoardFromCard" data-planid="{{item.planId}}">
+            <text class="room-plan-card-mini-tag">协作计划</text>
+            <text class="room-plan-card-mini-title">{{item.planTitle || '计划'}}</text>
+            <text class="room-plan-card-mini-sum">{{item.planSummary}}</text>
+            <text class="room-plan-card-mini-link">在计划书 P 中查看 ›</text>
+          </view>
+        </view>
+      </view>
+      <view class="msg-row msg-ai" wx:elif="{{!item.isMine}}">
+        <view class="msg-avatar msg-avatar-ai">👥</view>
+        <view class="msg-body">
+          <view class="msg-bubble msg-bubble-ai">
+            <image wx:if="{{item.msgType === 'image' && (item.imageTempUrl || item.imageFileId)}}" class="room-msg-img" src="{{item.imageTempUrl || item.imageFileId}}" mode="widthFix"></image>
+            <text class="msg-text" wx:if="{{item.content}}">{{item.content}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="msg-row msg-user" wx:else>
+        <view class="msg-body">
+          <view class="msg-bubble msg-bubble-user">
+            <image wx:if="{{item.msgType === 'image' && (item.imageTempUrl || item.imageFileId)}}" class="room-msg-img" src="{{item.imageTempUrl || item.imageFileId}}" mode="widthFix"></image>
+            <text class="msg-text" wx:if="{{item.content}}">{{item.content}}</text>
+          </view>
+        </view>
+        <view class="msg-avatar msg-avatar-user">
+          <image wx:if="{{settingsUser.avatar}}" class="msg-avatar-img" src="{{settingsUser.avatar}}" mode="aspectFill"></image>
+          <text wx:else>👤</text>
+        </view>
+      </view>
+    </block>
+    <view id="msg-bottom"></view>
+  </scroll-view>
+
+  <view class="ai-composer" wx:if="{{!activeRoomId && aiCollaborationStarted}}">
+    <view class="ai-quick-prompts" wx:if="{{showAiQuickPrompts && !layoutDiscoverMode}}">
+      <view
+        class="ai-quick-chip"
+        catchtap="onQuickPrompt"
+        data-text="帮我理一理想做的事"
+        hover-class="ai-quick-chip-hover"
+        hover-stay-time="80"
+      >理一理想法</view>
+      <view
+        class="ai-quick-chip"
+        catchtap="onQuickPrompt"
+        data-text="想找人一起做点事，怎么开始比较好"
+        hover-class="ai-quick-chip-hover"
+        hover-stay-time="80"
+      >找人一起做事</view>
+    </view>
+    <view class="input-bar input-bar--ai">
+      <view class="input-wrapper">
+        <view class="pending-ai-img-tag" wx:if="{{hasPendingAiImage}}">已选图</view>
+        <input class="text-input" type="text" placeholder="{{layoutDiscoverMode ? '描述想怎么改发现页，例如：导语改活泼、减少卡片…' : '输入消息…（可用语音输入）'}}" 
+          value="{{inputValue}}" bindinput="onInput" bindfocus="onAiInputFocus" bindblur="onAiInputBlur" bindconfirm="sendMessage" 
+          confirm-type="send" cursor-spacing="20"/>
+      </view>
+      <view class="input-actions">
+        <view class="input-action-btn" bindtap="takePhoto">
+          <text>📷</text>
+        </view>
+        <view class="input-send {{hasAiSendable ? 'active' : ''}}" 
+          bindtap="sendMessage">
+          <text>></text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view
+    class="plan-fab"
+    wx:if="{{(!activeRoomId && aiCollaborationStarted && !layoutDiscoverMode) || (activeRoomId && activeRoomPlanId)}}"
+    bindtap="openPlanBoard"
+    hover-class="plan-fab-hover"
+    hover-stay-time="100"
+  >
+    <text class="plan-fab-p">P</text>
+  </view>
+
+  <view class="input-bar" wx:if="{{activeRoomId}}">
+    <view class="input-wrapper">
+      <input class="text-input" type="text" placeholder="发送消息…" 
+        value="{{roomInput}}" bindinput="onRoomInput" bindconfirm="sendRoomChat" 
+        confirm-type="send" cursor-spacing="20"/>
+    </view>
+    <view class="input-actions">
+      <view class="input-action-btn" bindtap="chooseRoomImage">
+        <text>📷</text>
+      </view>
+      <view class="input-send {{roomInput ? 'active' : ''}}" bindtap="sendRoomChat">
+        <text>></text>
+      </view>
+    </view>
+  </view>
+
+</view>

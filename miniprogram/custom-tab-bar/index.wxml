@@ -1,0 +1,23 @@
+<view class="tab-bar">
+  <view class="tab-bar-inner">
+    <view class="tab-item" data-i="0" bindtap="onSwitchTab">
+      <text class="tab-emoji">💬</text>
+      <text class="tab-text {{selected === 0 ? 'on' : ''}}">会话</text>
+    </view>
+    <view class="tab-item" data-i="1" bindtap="onSwitchTab">
+      <text class="tab-emoji">🔔</text>
+      <text class="tab-text {{selected === 1 ? 'on' : ''}}">通知</text>
+    </view>
+    <view class="tab-plus-wrap" bindtap="openCreatePlan">
+      <view class="tab-plus"><text class="tab-plus-txt">+</text></view>
+    </view>
+    <view class="tab-item" data-i="2" bindtap="onSwitchTab">
+      <text class="tab-emoji">🔭</text>
+      <text class="tab-text {{selected === 2 ? 'on' : ''}}">发现</text>
+    </view>
+    <view class="tab-item" data-i="3" bindtap="onSwitchTab">
+      <text class="tab-emoji">👤</text>
+      <text class="tab-text {{selected === 3 ? 'on' : ''}}">我的</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,71 @@
+<view class="discover-page">
+  <view class="discover-toolbar">
+    <text class="discover-toolbar-link" bindtap="goLayoutChat">对话改版面</text>
+    <text class="discover-toolbar-link discover-toolbar-muted" bindtap="resetDiscoverLayout">恢复默认</text>
+  </view>
+
+  <view class="discover-lead">{{layout.hero}}</view>
+
+  <scroll-view class="discover-chips" scroll-x enhanced show-scrollbar="{{false}}">
+    <view
+      class="discover-chip {{activeChip === item.id ? 'discover-chip-on' : ''}}"
+      wx:for="{{layout.chips}}"
+      wx:key="id"
+      bindtap="onChipTap"
+      data-id="{{item.id}}"
+    >
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <scroll-view class="discover-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <block wx:if="{{currentPanel.cards}}">
+      <view class="discover-section">
+        <view class="discover-section-hd">
+          <text class="discover-section-title">{{currentPanel.title}}</text>
+          <text class="discover-section-sub" wx:if="{{currentPanel.subtitle}}">{{currentPanel.subtitle}}</text>
+        </view>
+        <view
+          class="discover-card"
+          wx:for="{{currentPanel.cards}}"
+          wx:for-item="card"
+          wx:for-index="cardIdx"
+          wx:key="id"
+          bindtap="onLayoutCardTap"
+          data-index="{{cardIdx}}"
+        >
+          <text class="discover-card-tag" wx:if="{{card.tag}}">{{card.tag}}</text>
+          <text class="discover-card-title">{{card.title}}</text>
+          <text class="discover-card-sub" wx:if="{{card.sub}}">{{card.sub}}</text>
+        </view>
+      </view>
+    </block>
+
+    <block wx:elif="{{currentPanel.tags && currentPanel.tags.length}}">
+      <view class="discover-section">
+        <view class="discover-section-hd">
+          <text class="discover-section-title">{{currentPanel.title}}</text>
+          <text class="discover-section-sub" wx:if="{{currentPanel.subtitle}}">{{currentPanel.subtitle}}</text>
+        </view>
+        <view class="discover-topics">
+          <text
+            class="discover-topic"
+            wx:for="{{currentPanel.tags}}"
+            wx:key="*this"
+            bindtap="onTopicTap"
+            data-tag="{{item}}"
+          >
+            {{item}}
+          </text>
+        </view>
+      </view>
+    </block>
+
+    <view class="discover-future" wx:if="{{layout.footerNote}}">
+      <text class="discover-future-title">{{layout.footerNote.title}}</text>
+      <text class="discover-future-line" wx:for="{{layout.footerNote.lines}}" wx:key="*this">· {{item}}</text>
+    </view>
+
+    <view class="discover-bottom-spacer" />
+  </scroll-view>
+</view>

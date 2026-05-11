@@ -1,0 +1,36 @@
+<scroll-view class="page-about-scroll" scroll-y="true" enhanced="true" show-scrollbar="{{false}}">
+  <view class="page-about">
+    <view class="about-lead">
+      即DAO 帮助你把零散需求整理成可协作的计划，在对话与群组里推进履约。界面刻意留白、步骤从少到多，把想象空间留给真实协作。
+    </view>
+
+    <view class="about-section">
+      <view class="about-h2">功用与宗旨（对外宣传可用）</view>
+      <view class="about-p">用一句话说清「能干什么」，其余不必写满：例如「聊清需求 → 写计划 → 找人协作」；宗旨可强调自组织、信用与履约，而非中心派单。</view>
+      <view class="about-muted">小程序简介、搜索关键词、海报可复用仓库内 docs/POSITIONING_COPY.md 中的短句，保持克制，留白给用户自行探索。</view>
+    </view>
+
+    <view class="about-section">
+      <view class="about-h2">用户须知（摘要）</view>
+      <view class="about-p">完整条文以仓库 docs/USER_NOTICE.md 为准，发版前可同步法务/运营修订。以下为产品摘要：</view>
+      <view class="about-bullet">· AI 对话次数、看广告加次、VIP 等为演示逻辑，非微信官方计费；正式商业化前将替换为真实广告/支付能力。</view>
+      <view class="about-bullet">· 协作与陌生人匹配依赖云开发数据库与内容安全策略；请如实填写计划与标签，禁止违法违规与欺诈内容。</view>
+      <view class="about-bullet">· 「通知」为应用内收件箱；关闭设置中的协作类提醒后，仍可能错过邀请，重要事项请定期打开通知或会话列表。</view>
+      <view class="about-bullet">· 陌生人匹配可见范围、邀请与拒绝流程见计划书页开关与用户须知；对方身份在约定节点前可能部分隐藏。</view>
+      <view class="about-bullet">· 信用分、勋章等为体验增强能力，规则以页面展示及云端配置为准。</view>
+    </view>
+
+    <view class="about-section">
+      <view class="about-h2">用户须知展示位置（规划）</view>
+      <view class="about-bullet">· 本页「关于即DAO」（当前）</view>
+      <view class="about-bullet">· 首次使用 AI 或开启陌生人池前：可增加一次「已阅读」勾选（待产品排期）</view>
+      <view class="about-bullet">· 计划书页底部或「匹配偏好」弹层内链至摘要（待排期）</view>
+      <view class="about-bullet">· 设置页底部「用户须知」入口（待排期）</view>
+    </view>
+
+    <view class="about-section">
+      <view class="about-h2">版本说明</view>
+      <view class="about-p">当前为微信小程序 + 云开发统一云函数「service」；不涉及发币或链上治理。DAO 在此指协作与自组织心智。</view>
+    </view>
+  </view>
+</scroll-view>

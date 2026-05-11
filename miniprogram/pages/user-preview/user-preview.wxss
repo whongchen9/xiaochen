@@ -1,0 +1,260 @@
+.up-page {
+  min-height: 100vh;
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.up-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx;
+  gap: 24rpx;
+}
+
+.up-loading-text {
+  font-size: 26rpx;
+  color: var(--text-hint);
+}
+
+.up-error {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+  gap: 32rpx;
+}
+
+.up-error-text {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.up-error-back {
+  padding: 16rpx 48rpx;
+  font-size: 28rpx;
+  color: var(--primary);
+  border: 1rpx solid var(--primary);
+  border-radius: var(--radius-md);
+}
+
+.up-scroll {
+  flex: 1;
+  height: 0;
+  min-height: 40vh;
+}
+
+.up-header {
+  padding: 40rpx 32rpx 32rpx;
+  background: var(--bg-card);
+  border-bottom: 1rpx solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.up-avatar-wrap {
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--gray-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+}
+
+.up-avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.up-avatar-ph {
+  font-size: 72rpx;
+}
+
+.up-avatar-demo {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #fff;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2f6cf6, #5b8def);
+}
+
+.up-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.up-sub {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: var(--text-hint);
+}
+
+.up-section {
+  margin-top: 24rpx;
+  padding: 24rpx 32rpx;
+  background: var(--bg-card);
+  border-top: 1rpx solid var(--border-light);
+  border-bottom: 1rpx solid var(--border-light);
+}
+
+.up-section-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16rpx;
+}
+
+.up-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.up-tag {
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.up-stat-grid {
+  display: flex;
+  justify-content: space-around;
+  gap: 16rpx;
+}
+
+.up-stat-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.up-stat-num {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.up-stat-label {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--text-hint);
+}
+
+.up-stat-hint {
+  display: block;
+  margin-top: 20rpx;
+  font-size: 22rpx;
+  color: var(--text-hint);
+  line-height: 1.5;
+}
+
+.up-collab-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 12rpx;
+  background: var(--bg-page);
+  border-radius: var(--radius-md);
+  border: 1rpx solid var(--border-light);
+}
+
+.up-collab-row:active {
+  opacity: 0.88;
+}
+
+.up-collab-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.up-collab-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.up-collab-meta {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--text-hint);
+}
+
+.up-collab-sum {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.up-collab-go {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: var(--primary);
+}
+
+.up-collab-go.muted {
+  color: var(--text-hint);
+}
+
+.up-empty-line {
+  font-size: 26rpx;
+  color: var(--text-hint);
+}
+
+.up-bottom-space {
+  height: calc(160rpx + env(safe-area-inset-bottom));
+}
+
+.up-footer {
+  flex-shrink: 0;
+  padding: 16rpx 32rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  background: var(--bg-card);
+  border-top: 1rpx solid var(--border-light);
+}
+
+.safe-area-bottom {
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+}
+
+.up-invite-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: var(--radius-md);
+  font-size: 30rpx;
+  font-weight: 600;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+.up-invite-btn::after {
+  border: none;
+}

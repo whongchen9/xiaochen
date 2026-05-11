@@ -1,0 +1,199 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg-page);
+}
+
+.pending-invite-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16rpx 24rpx 8rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 16rpx;
+  background: linear-gradient(135deg, #eef4ff, #f5f0ff);
+  border: 1rpx solid #e0e7ff;
+}
+
+.pending-invite-text {
+  font-size: 26rpx;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.pending-invite-arrow {
+  font-size: 24rpx;
+  color: var(--primary);
+}
+
+/* 会话列表 */
+.conversation-list {
+  padding: 8rpx 0 180rpx;
+}
+
+/* 会话行（不透明背景，避免与下层/悬浮层叠时透出错乱） */
+.conv-row {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  border-bottom: 1rpx solid var(--gray-2);
+  background: var(--bg-card);
+}
+
+.conv-row:active {
+  background: var(--gray-1);
+}
+
+.conv-pinned {
+  background: #f8f7ff;
+  border-bottom: 1rpx solid #e8e6ff;
+}
+
+.conv-avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+
+.ai-avatar {
+  background: linear-gradient(135deg, #534AB7, #7F77DD);
+  color: #fff;
+}
+
+.room-avatar {
+  color: #fff;
+  font-size: 22rpx;
+}
+
+.room-color-0 { background: #2f6cf6; }
+.room-color-1 { background: #22c55e; }
+.room-color-2 { background: #f59e0b; }
+.room-color-3 { background: #ef4444; }
+.room-color-4 { background: #8b5cf6; }
+
+.avatar-text {
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.conv-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.conv-top {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 4rpx;
+}
+
+.conv-top-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.conv-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  max-width: 100%;
+}
+
+.conv-time {
+  font-size: 22rpx;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.conv-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.conv-preview {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* 置顶徽章 */
+.badge-pinned {
+  font-size: 20rpx;
+  background: #e6f0ff;
+  color: var(--primary);
+  padding: 2rpx 12rpx;
+  border-radius: 12rpx;
+  margin-left: 8rpx;
+  flex-shrink: 0;
+}
+
+.review-badge {
+  font-size: 20rpx;
+  background: #fff7ed;
+  color: #c2410c;
+  padding: 2rpx 12rpx;
+  border-radius: 12rpx;
+  margin-left: 8rpx;
+  flex-shrink: 0;
+}
+
+/* 未读标记 */
+.unread-badge {
+  background: var(--danger);
+  color: #fff;
+  font-size: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+  flex-shrink: 0;
+}
+
+/* 区域分割（与列表底色区分，避免看起来像粘在会话行上） */
+.section-divider {
+  padding: 20rpx 24rpx 8rpx;
+  background: var(--bg-page);
+  position: relative;
+  z-index: 1;
+}
+
+.section-divider-first {
+  padding-top: 12rpx;
+}
+
+.section-label {
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}
+
+.conv-preview-muted {
+  color: var(--text-tertiary);
+}
+
+.sub-empty {
+  padding: 24rpx 24rpx 8rpx;
+}
+
+.sub-empty-text {
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}

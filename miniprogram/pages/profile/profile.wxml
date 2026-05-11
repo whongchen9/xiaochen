@@ -1,0 +1,163 @@
+<!-- 个人中心 -->
+<view class="profile-page">
+
+  <view class="profile-header">
+    <view class="profile-avatar">
+      <image wx:if="{{userInfo.avatar}}" class="profile-avatar-img" src="{{userInfo.avatar}}" mode="aspectFill"></image>
+      <text wx:else>👤</text>
+    </view>
+    <view class="profile-info">
+      <view class="profile-name-row">
+        <text class="profile-name">{{userInfo.nickname || '点击登录'}}</text>
+      </view>
+      <text class="profile-phone">{{userInfo.phone || '未绑定手机号'}}</text>
+      <text class="profile-sub">已参与 {{creditStats.totalPlans}} 个计划 · 完成 {{creditStats.completedPlans}} 个</text>
+    </view>
+    <button class="profile-edit-btn" bindtap="enhanceProfile" wx:if="{{!userInfo.avatar}}">完善资料</button>
+  </view>
+
+  <view class="credit-repair" wx:if="{{creditStats.score < 80}}">
+    <view class="credit-repair-hd">
+      <text class="credit-repair-title">⚠️ 信用分需要提升</text>
+      <text class="credit-repair-score">当前 {{creditStats.score}}</text>
+    </view>
+    <text class="credit-repair-desc">爽约次数较多，匹配优先级已降低。参加以下活动可提升信用分：</text>
+    <view class="credit-repair-actions">
+      <view class="credit-btn credit-btn-charity" bindtap="doCharity">🏘️ 公益协作 +3分</view>
+      <view class="credit-btn credit-btn-help" bindtap="doHelp">🤝 社区互助 +2分</view>
+    </view>
+    <view class="credit-progress">
+      <text class="credit-progress-label">恢复到正常信用</text>
+      <view class="credit-progress-bar">
+        <view class="credit-progress-fill" style="width:{{creditStats.score > 80 ? 100 : (creditStats.score / 80 * 100)}}%"></view>
+      </view>
+      <text class="credit-progress-num">{{creditStats.score}}/80</text>
+    </view>
+  </view>
+
+  <view class="credit-archive" wx:else>
+    <text class="credit-archive-title">信用档案</text>
+    <view class="credit-archive-row">
+      <view class="credit-chip">履约率 {{creditStats.fulfillRate}}%</view>
+      <view class="credit-chip">{{creditStats.rating}}★</view>
+      <view class="credit-chip" wx:if="{{creditStats.breachCount === 0}}">0次爽约</view>
+      <view class="credit-chip chip-warn" wx:else>{{creditStats.breachCount}}次爽约</view>
+    </view>
+  </view>
+
+  <view class="tag-section">
+    <view class="tag-section-hd">
+      <text class="tag-section-title">个人标签</text>
+      <text class="tag-section-edit" bindtap="editTags">编辑</text>
+    </view>
+    <view class="tag-list">
+      <view class="tag-chip tag-chip-blue" wx:for="{{userTags}}" wx:key="*this">{{item}}</view>
+      <view class="tag-chip tag-chip-add" bindtap="editTags">+添加</view>
+    </view>
+  </view>
+
+  <view class="medal-wall" bindtap="toggleMedals">
+    <view class="medal-wall-hd">
+      <text>🏅 成就勋章</text>
+      <text class="medal-wall-arrow">{{medalsExpanded ? '收起 ▲' : '展开 ▼'}}</text>
+    </view>
+    <view class="medal-list" wx:if="{{medalsExpanded}}">
+      <view class="medal-item {{item.earned ? '' : 'locked'}}" wx:for="{{badges}}" wx:key="id">
+        <view class="medal-icon" style="background:{{item.bg}};{{item.earned ? '' : 'filter:grayscale(1);'}}">{{item.icon}}</view>
+        <text class="medal-name" style="color:{{item.earned ? 'var(--text-primary)' : '#ccc'}}">{{item.name}}</text>
+        <text class="medal-desc">{{item.earned ? item.desc : '🔒 未解锁'}}</text>
+      </view>
+    </view>
+    <view class="medal-preview" wx:else>
+      <text wx:for="{{badges}}" wx:key="id" wx:if="{{item.earned}}">{{item.icon}} </text>
+      <text wx:if="{{medalPreviewEmpty}}" class="medal-empty-hint">暂无勋章</text>
+    </view>
+  </view>
+
+  <view class="history-section">
+    <view class="history-hd">
+      <text class="history-title">协作历史</text>
+      <text class="history-more" bindtap="viewAllHistory">查看全部 →</text>
+    </view>
+    <view class="history-placeholder">
+      <text class="history-placeholder-text">展示样式待定</text>
+    </view>
+  </view>
+
+  <view class="token-card" wx:if="{{!tokenInfo.isVip}}">
+    <view class="token-card-hd">
+      <text class="token-card-title">⛽ AI 剩余 {{tokenInfo.balance}} 次</text>
+      <text class="token-card-hint">每次 AI 对话消耗 1 次 · 每日赠送 {{tokenInfo.freeDaily || 28}} 次（演示）</text>
+    </view>
+    <view class="token-card-actions">
+      <button class="token-ad-btn" bindtap="watchAd" disabled="{{tokenInfo.adsLeft <= 0}}">
+        <text>📺 看广告 +{{tokenInfo.adRewardPerView || 5}}</text>
+        <text class="token-ad-sub">今日剩余 {{tokenInfo.adsLeft}} 次</text>
+      </button>
+      <button class="token-vip-btn" bindtap="goVip">
+        <text>👑 开通VIP</text>
+        <text class="token-vip-sub">无限畅聊</text>
+      </button>
+    </view>
+  </view>
+
+  <view class="vip-active-card" wx:if="{{tokenInfo.isVip}}">
+    <text class="vip-icon">👑</text>
+    <view class="vip-info">
+      <text class="vip-title">VIP 会员</text>
+      <text class="vip-expire">有效期至 {{tokenInfo.vipExpire}} · AI 无限</text>
+    </view>
+    <view class="vip-renew-btn" bindtap="goVip">续费</view>
+  </view>
+
+  <view class="profile-menu">
+    <view class="menu-item" bindtap="goToAddress">
+      <view class="menu-left"><text class="menu-icon">📍</text><text>常用地址</text></view>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="profile-menu">
+    <view class="menu-item" bindtap="goToSettings">
+      <view class="menu-left"><text class="menu-icon">⚙️</text><text>设置</text></view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goToAbout">
+      <view class="menu-left"><text class="menu-icon">ℹ️</text><text>关于即DAO</text></view>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- VIP 选档：含关闭，避免系统弹窗仅两档无取消 -->
+  <view wx:if="{{showVipSheet}}" class="vip-sheet-mask" catchtouchmove="noop" bindtap="closeVipSheet">
+    <view class="vip-sheet-card" catchtap="noop">
+      <view class="vip-sheet-hd">
+        <text class="vip-sheet-title">👑 开通 VIP</text>
+        <text class="vip-sheet-close" bindtap="closeVipSheet">关闭</text>
+      </view>
+      <text class="vip-sheet-line">月卡 ¥9.9 — AI 无限畅聊（演示）</text>
+      <text class="vip-sheet-line">年卡 ¥99 — 无限畅聊 + 专属徽章（演示）</text>
+      <view class="vip-sheet-actions">
+        <view class="vip-sheet-plan vip-sheet-plan-month" bindtap="onVipPlanTap" data-type="monthly">开通月卡</view>
+        <view class="vip-sheet-plan vip-sheet-plan-year" bindtap="onVipPlanTap" data-type="yearly">开通年卡</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="tag-editor-mask" wx:if="{{tagEditorVisible}}" catchtouchmove="noop" bindtap="closeTagEditor">
+    <view class="tag-editor-sheet" catchtap="noop">
+      <view class="tag-editor-hd">
+        <text class="tag-editor-title">编辑个人标签</text>
+        <text class="tag-editor-close" bindtap="closeTagEditor">✕</text>
+      </view>
+      <text class="tag-editor-hint">用逗号或换行分隔，最多 12 个，每个不超过 16 字</text>
+      <textarea class="tag-editor-textarea" value="{{tagDraft}}" maxlength="500" bindinput="onTagDraftInput" auto-height="{{true}}" placeholder="例如：有电动车，体力好"/>
+      <view class="tag-editor-ft">
+        <view class="tag-editor-btn cancel" bindtap="closeTagEditor">取消</view>
+        <view class="tag-editor-btn ok" bindtap="saveTags">保存</view>
+      </view>
+    </view>
+  </view>
+
+  <xiaochen-assistant id="xiaochen-assistant" />
+</view>

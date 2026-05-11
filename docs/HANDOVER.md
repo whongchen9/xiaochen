@@ -1,7 +1,8 @@
-# 小陈即到 — 开发交接说明（Cursor / 接手必读）
+# 即DAO（曾用名：小陈即到）— 开发交接说明（Cursor / 接手必读）
 
 本文档说明**本地存储约定、云开发调用方式、自定义组件接入方式**以及**已知坑点**，便于在不读完全仓库的前提下快速上手。  
-业务功能清单见 [`BASE_REQUIREMENTS.md`](./BASE_REQUIREMENTS.md)。
+业务功能清单见 [`BASE_REQUIREMENTS.md`](./BASE_REQUIREMENTS.md)。  
+对外文案与简介方向见 [`POSITIONING_COPY.md`](./POSITIONING_COPY.md)；通知策略见 [`NOTIFY_STRATEGY.md`](./NOTIFY_STRATEGY.md)；用户须知见 [`USER_NOTICE.md`](./USER_NOTICE.md)；发版检查见 [`RELEASE_CHECKLIST.md`](./RELEASE_CHECKLIST.md)；北极星指标见 [`METRICS_NORTH_STAR.md`](./METRICS_NORTH_STAR.md)。
 
 ---
 
@@ -21,6 +22,7 @@
 | **`chat_temp_image`** | `pages/chat/chat.js` | 选图后的临时路径占位（与 `[图片]` 文案配合，发送逻辑以页面为准）。 |
 | **`addressList`** | `xiaochen-assistant.js` | 组件内维护的地址列表缓存（若与云地址库并存，需注意数据源一致性）。 |
 | **`userBadges`** | `profile.js` | 个人中心徽章类本地状态（若有）。 |
+| **`xc_room_last_seen_<roomId>`** | `pages/chat/chat.js` | 离开群聊页时写入的本地时间戳（毫秒），用于 `conversations` 列表推断「有新消息」圆点（单机、近似）。 |
 
 **云开发身份**：服务端以 **`cloud.getWXContext().OPENID`** 为准（见 `cloudfunctions/service/index.js`），与客户端是否存 `openid` 无必然耦合。
 
@@ -41,6 +43,8 @@
 - 文件：**`miniprogram/config/cloudEnv.js`**
 - 字段：**`envId`**：填云控制台「环境 ID」；**留空**则使用 `wx.cloud.DYNAMIC_CURRENT_ENV`（跟随开发者工具当前所选环境）。
 - `app.js` 里：`wx.cloud.init({ traceUser: true, env: cloudEnv.envId ? cloudEnv.envId : wx.cloud.DYNAMIC_CURRENT_ENV })`。
+- **AppID 本机覆盖（推荐）**：复制根目录 **`project.private.config.json.example`** 为 **`project.private.config.json`**（已 `.gitignore`），只在本机填写 `appid`；微信开发者工具会**自动合并**该文件，不必反复改公共的 `project.config.json`。
+- **一键装云函数依赖**：仓库根目录执行 **`npm run bootstrap`**，或 **`powershell -File scripts/bootstrap.ps1`**（会安装 `cloudfunctions/service` 依赖；若尚无 `project.private.config.json` 则从示例生成一份）。**上传云函数**仍须在开发者工具里对 `service` 点一次「上传并安装依赖」，云端非脚本可代劳。
 
 ### 2.3 调用协议（唯一入口）
 
@@ -53,16 +57,16 @@
 封装：**`miniprogram/utils/cloud.js`** → `call(action, data)`：
 
 - 成功：返回云函数 `result`（且约定 `result.ok !== false`）。
-- 失败：`Promise.reject({ errMsg, raw })`，`errMsg` 来自 `result.errMsg` 或默认 `'请求失败'`。
+- 失败：`Promise.reject({ errMsg, errCode?, raw })`，`errMsg` 来自 `result.errMsg` 或默认 `'请求失败'`；部分业务错误带 `errCode`（如 `STRANGER_INVITES_DB`）。
 
 页面侧典型写法：
 
 ```js
 const { call } = require('../../utils/cloud');
-await call('matchSnapshot', { latitude: 0, longitude: 0 });
+await call('chat', { message: '你好', history: [] });
 ```
 
-**action 列表**见 [`BASE_REQUIREMENTS.md`](./BASE_REQUIREMENTS.md) 第 4 节；源码总闸：`cloudfunctions/service/index.js` 内 `switch (action)`。
+**action 列表**见 [`BASE_REQUIREMENTS.md`](./BASE_REQUIREMENTS.md) 各节；源码总闸：`cloudfunctions/service/index.js` 内 `switch (action)`。
 
 ### 2.4 云函数本地依赖
 
@@ -118,11 +122,12 @@ const assistant = this.selectComponent('#xiaochen-assistant');
 if (assistant) assistant.openDialog();
 ```
 
-**当前约定**：需要脚本唤起助手（如 `openDialog`）的页面使用带 **`id`** 的写法；仅需点击悬浮钮的页面可省略 **`id`**（如 `profile`、`notify` 等，以各页 `*.wxml` 为准）。
+**当前约定**：需要脚本唤起助手（如 `openDialog`）的页面使用带 **`id`** 的写法；仅需点击悬浮钮的页面可省略 **`id`**（如 `profile`、`notify`、**`conversations`（首页）** 等，以各页 `*.wxml` 为准）。
 
 ### 3.3 与聊天主页的关系
 
-- **`pages/chat/chat`** 的 `chat.json` **未**注册 `xiaochen-assistant`（避免首页双层助手）；其它 Tab 类页面多已挂载。
+- **`pages/conversations/conversations`**（`app.json` 首页）已挂载 **`xiaochen-assistant`**，打开小程序即可用小陈助手。
+- **`pages/chat/chat`** 的 `chat.json` **未**注册 `xiaochen-assistant`（进入全屏聊天页时避免与悬浮助手叠两层）。
 - 跨页唤起全文对话：可 **`wx.setStorageSync('xiaochen_assistant_input', '...')`** 后 **`wx.reLaunch({ url: '/pages/chat/chat' })`**（见 `chat.js` `onLoad` 读取逻辑）。
 
 ---
@@ -222,7 +227,7 @@ V3（当前）：AI对话 → 制定计划 → 双向确认 → 拉群协作（A
 
 | 内容 | 原因 |
 |------|------|
-| `pages/match/` 匹配页 | AI自动匹配拉群，不再需要广场 |
+| `pages/match/`、`pages/post-detail/` | 旧广场 / 意向帖 / 信息帖体系已移除；匹配在 AI 聊天与协作群内完成 |
 | `pages/order-detail/` | 不再有订单概念 |
 | float-nav 中 match 按钮 | 页面已删除，6页同步移除 |
 | `utils/nav.js` 中 match 路由 | 同步清理 |
@@ -243,7 +248,7 @@ V3（当前）：AI对话 → 制定计划 → 双向确认 → 拉群协作（A
 | 信用修复（公益协作/社区互助） | P1 | 低信用用户的救赎路径 |
 | 协作完整历史列表页 | P2 | 全部计划记录展示 |
 
-**实现进度（与仓库同步）：** 已接入 `profile` / `saveUserTags` / `creditRepair` / `createPlan` / `listChatRooms` / `getRoomMessages` / `sendRoomMessage` 等；集合 `xc_plans`、`xc_chat_rooms`、`xc_chat_messages`。协作群 **列表入口** 在「消息」页；**新建协作** 在首页（聊天页）顶栏；进群后聊天 UI 仍在 `pages/chat/chat`（参数 `openRoomId` / 分享 `roomId`）。群消息内容安全、离线助手回复过审、协作 handler 模块化等见云函数 `service`。**未做：** `matchToPlan`、邀请卡片与通知联动、匹配模式偏好持久化、会话列表首页（方向 B，见 §8）等。
+**实现进度（与仓库同步）：** 已接入 `profile` / `saveUserTags` / `creditRepair` / `createPlan` / `listChatRooms` / `getRoomMessages` / `sendRoomMessage` 等；集合 `xc_plans`、`xc_chat_rooms`、`xc_chat_messages`。协作群入口在 **首页「会话」**（`pages/conversations`）；**「通知」页**（`pages/notify`）仅展示云端 **系统 / 订阅** 通知；进群后聊天 UI 仍在 `pages/chat/chat`（参数 `openRoomId` / 分享 `roomId`）。群消息内容安全、离线助手回复过审、协作 handler 模块化等见云函数 `service`。**未做：** `matchToPlan`、邀请卡片与通知联动、匹配模式偏好持久化等。
 
 ### 7.5 UI优化记录（已实现）
 
@@ -254,7 +259,7 @@ V3（当前）：AI对话 → 制定计划 → 双向确认 → 拉群协作（A
 - 用户气泡：蓝色底靠右，右下角8rpx微收
 - 小陈助手弹窗：加✕关闭按钮
 - 编辑面板：底部sheet，字段分组（正文/标题/关键词/图片）
-- 全局：page-header, page-loading, safe-area, float-nav
+- 全局：page-loading、safe-area、float-nav；**页面主标题**以各页 `*.json` 的 **`navigationBarTitleText`** 为准，内容区 **不要** 再用 `.page-header` + `.page-title` 重复同一主标题。
 
 ### 7.6 个人页改造
 
@@ -297,6 +302,63 @@ V3（当前）：AI对话 → 制定计划 → 双向确认 → 拉群协作（A
 - profile.wxss金色渐变改CSS变量
 - address弹窗居中模态改底部sheet
 
+### 7.9 陌生人匹配：会话态与状态键（产品已定稿，2026-05）
+
+本节固化 **「双方挑人 × 自动组局」** 与 **AI 会话内匹配呈现** 的约定，供实现 `pages/chat/chat` 匹配条、计划书左右滑、云 `runStrangerMatchScan` 联调时对照。**前提**：双方 `strangerPoolEnabled` 均为真且引擎判定可配对；否则云侧 `skipped: pool_off` 等，不进入下表。
+
+#### 7.9.1 计划字段（`xc_plans` / `getPlanBoard` 偏好）
+
+| 字段 | 语义 |
+|------|------|
+| `strangerPoolEnabled` | 是否进入陌生人池。 |
+| `pickBeforeInviteEnabled` | **挑选候选人模式**（真 = 必须经挑选/邀请链，不走「无感自动并排揭晓」）。 |
+| `autoFormRoomEnabled` | **允许系统自动组局**（与云侧 `needInvite` 推导一致）。 |
+| `coverImageFileId` | 可选；计划书页顶部配图，微信云文件 ID（`cloud://…`），仅发起人可 `setPlanCoverImage` 写入/移除。 |
+
+#### 7.9.2 状态键（研发命名）
+
+以 `(A挑, B挑)` 表示双方 `pickBeforeInviteEnabled`（**挑** = `true`）。
+
+| 状态键 | A 挑 | B 挑 | 说明 |
+|--------|------|------|------|
+| `P0_NONE` | 关 | 关 | 双方无「挑选」义务；可走会话内匹配条、定时揭晓头像、计划书左右滑等叙事。 |
+| `P2_BOTH` | 开 | 开 | 互挑/互邀；**禁止**用定时亮替代「点头像进挑选」。 |
+| `P1_A` | 开 | 关 | **A 决策**（同意系统代为申请或自行挑选邀请）；**B 无感**（无挑选义务；展示最小化直至链推进）。 |
+| `P1_B` | 关 | 开 | 与 `P1_A` 对称。 |
+
+#### 7.9.3 与云 `runStrangerMatchScan` 的概念对齐
+
+云内已有：`needInvite = pickA || pickB || !autoA || !autoB`；`needInvite && score >= minInvite` → 邀请链；`!needInvite && score >= minAuto` → 自动建群。
+
+| 状态键 | `needInvite`（概念） | 自动建群（分数够时） |
+|--------|----------------------|------------------------|
+| `P0_NONE` | 仅当 **双方** `autoFormRoomEnabled` 均为真时为假；否则为真 | `needInvite === false` 且过 `minAuto` → **auto** |
+| `P2_BOTH` | **恒真** | **不**走 auto，走邀请/互相同意链 |
+| `P1_A` / `P1_B` | **恒真** | 不 auto；**有挑人方**走挑选/系统代申请/发邀；**无感方**不强制交互 |
+
+#### 7.9.4 前端职责边界（避免与计划书页打架）
+
+| 区域 | `P0_NONE` | `P2_BOTH` | `P1_*` |
+|------|-----------|-----------|--------|
+| **AI 会话 chat** | 匹配条、黑头像、定时亮、左右滑计划书（实现时落地） | 匹配条 + **必须点头像** 进挑选/邀请 | 挑人侧同 `P2_BOTH`；无感侧弱占位或延迟，**不自动给全文** |
+| **计划书 P** | 长文、完整度、合规、开关 | 同左 + 邀请说明 | 挑人侧全能力；无感侧最小暴露 |
+
+#### 7.9.5 实现前建议锁死（防扯皮）
+
+1. **「无感」**：定义为无「挑选 / 为被匹配点同意」义务；是否允许 **一条极简系统提示**（排障）→ **已锁定**：允许一行弱提示（**A1b**，见勾选表）。  
+2. **`P0_NONE` 下左右滑看对方计划书** → **已锁定**：**A2a**（标题+摘要）；**A3b**（定时揭晓/自动匹配成功后可升全文）。  
+3. **「双方都以为在自己群里」**：UI 可叙事为各自 AI 会话壳 + **同一条匹配态**；底层是否共用 `bridge` room 与 **消息流是否合并** 须单独设计（合并则同步成本高）。
+
+后续可在云增加 `getMatchSurfaceState` 或在 `runStrangerMatchScan` 返回中附带 `surface: P0_NONE|P1_A|P1_B|P2_BOTH` 供 chat 渲染（待开发）。
+
+**产品勾选项（已定稿，2026-05-06）**：[`STRANGER_MATCH_PRODUCT_CHOICES.md`](./STRANGER_MATCH_PRODUCT_CHOICES.md)。产品确认 **全部采用该文件推荐列**；摘要：**A1b、A2a、A3b、A4b、A5b、A6a、A7c**（过渡可先 **A7b**）、**A8b**。
+
+#### 7.9.6 运维与实现边界
+
+- **集合**：陌生人邀请与阻断依赖 **`xc_stranger_match_invites`**。未在云控制台创建时，`runStrangerMatchScan` / 同意或拒绝邀请会返回 **`errCode: STRANGER_INVITES_DB`** 与可读 **`errMsg`**（便于小程序 Toast 与排障）。
+- **扫描池条数**：云函数环境变量 **`STRANGER_MATCH_POOL_LIMIT`** 控制从 `xc_plans`（`status: matching`）单次拉取上限，**合法范围 40–200**，省略时默认 **120**（旧版硬编码 80 已替换）。
+- **代码对照表**：[`STRANGER_MATCH_IMPLEMENTATION_MAP.md`](./STRANGER_MATCH_IMPLEMENTATION_MAP.md)（A1–A8 与主要文件 / 云 action 映射）。
+
 ### 7.6 信用/声誉系统设计
 
 - 履约率：完成计划数/总参与数
@@ -326,26 +388,25 @@ V3（当前）：AI对话 → 制定计划 → 双向确认 → 拉群协作（A
 
 **命名与导航**
 
-- 原「通知」在悬浮导航等处改为 **「消息」**（图标多为 💬）；页面路径仍为 `pages/notify/notify`，`utils/nav.js` 中 key 仍为 `notify`（仅改展示文案，避免牵动全局路由）。
+- **通知**：悬浮导航等处展示 **「通知」**，路径 `pages/notify/notify`，`utils/nav.js` 中 key 仍为 `notify`。
 
-**「消息」页 `notify`（聚合收件箱）**
+**「通知」页 `notify`**
 
-垂直分段（同一滚动区域内）：
+仅展示云端通知（协作群不在此页，入口见首页 **会话**）：
 
 | 区块 | 说明 |
 |------|------|
-| **协作群** | 调用 `listChatRooms`；点击行 **`navigateTo`** → `pages/chat/chat?openRoomId=…&roomTitle=…`。顶部说明：**在首页点「新建协作」发起**；保留邀请/成员转发需审批等规则文案。空状态引导去首页「新建协作」。 |
 | **系统通知** | 云端通知中 **`category !== 'match'`**；列表标签 **「系统」**。 |
 | **订阅通知** | **`category === 'match'`**（协作/撮合类）；标签 **「订阅」**。若用户在设置中关闭协作类提醒，显示对应提示。 |
 
-页头副文案 **「通知 N 条」** 仅统计上述两类云端通知条数，**不含协作群数量**。
-
 **首页 `pages/chat/chat`（AI）**
 
-- **不再**在首页使用「AI / 协作群」Tab；默认仅为 **AI 对话区**。
-- 导航栏下方 **顶栏**（仅未进入群聊时）：左侧短说明 + 右侧 **「＋ 新建协作」**；创建成功后在 **本页切入群聊 UI**（不额外 `navigateTo` 叠一层首页）。
-- 协作群完整交互（消息列表、输入、邀请成员、离线客服面板等）仍在 **`chat`**，通过 **`openRoomId`**、分享 **`roomId`** 等进入。
-- 群内 **「‹ 返回」**：若页面栈长度 > 1 则 `navigateBack`，否则 `reLaunch` 到「消息」页（产品侧曾表示暂不纠结返回策略，但当前实现如此，改版时请一并考虑）。
+- **不再**在首页使用「AI / 协作群」Tab。
+- **默认**：未进入协作群时先展示 **落地页**，底部主按钮 **「新建协作」**，点击后才展示 **AI 对话区**（不立即调用 `createPlan`）；协作群在理清需求后另行创建（或由后续产品步骤接入）。
+- **会话页顶栏「新建协作」**：`navigateTo` 打开 `/pages/chat/chat?startAi=1`，直接进入 AI 对话区（跳过落地页）。
+- 小陈助手预填跳转仍会 **直接进入 AI 对话** 并发送。
+- 协作群完整交互（消息列表、输入、邀请成员、计划书入口 **P** 等）仍在 **`chat`**，通过 **`openRoomId`**、分享 **`roomId`** 等进入；**群内旧版「入群审批 / 离线客服」面板已移除**（匹配与计划偏好以计划书页为准）。
+- 群内 **「‹ 返回」**：若页面栈长度 > 1 则 `navigateBack`，否则 `reLaunch` 到首页 **会话**（`pages/conversations`）。
 
 **其它**
 
@@ -354,24 +415,27 @@ V3（当前）：AI对话 → 制定计划 → 双向确认 → 拉群协作（A
 
 ### 8.2 相关文件路径（界面还原优先看）
 
-- `miniprogram/pages/notify/*`（消息聚合布局与样式）
-- `miniprogram/pages/chat/*`（AI + 顶栏 + 群内视图）
+- `miniprogram/pages/conversations/*`（首页会话列表 + 小陈助手）
+- `miniprogram/pages/notify/*`（通知列表布局与样式）
+- `miniprogram/pages/settings/*`、`miniprogram/pages/address/*`
+- `miniprogram/pages/chat/*`（AI + 落地页 + 群内视图）
+- `miniprogram/pages/user-preview/*`（他人协作名片：`targetOpenid`，可选 `roomId` / `planId`）
 - `miniprogram/pages/collab-history/*`
-- 各页悬浮导航：`profile` / `address` / `settings` / `chat` 等 `*.wxml` 中 `float-btn` 文案「消息」
+- 各页悬浮导航：首页会话列表 `float-btn` 文案 **「通知」** 进入 `notify`；其余页以各自 `*.wxml` 为准
 
-### 8.3 待实现：方向 B（会话列表 + 置顶 AI）
+### 8.3 待实现：方向 B（会话列表）与「AI 入口」产品结论
 
-已与产品讨论、**尚未开发**，供界面稿对齐：
-
-- **首页主体**从「直接进入 AI」演进为 **会话列表**（类比桌面端工具左侧栏；小程序用 **整页纵向列表**）。
-- **列表首条永久置顶**：联系人固定为 **AI（小陈助手）**，不沉底、不可删。
-- **其余条目**：主要为 **协作会话**（绑定计划/群），按最近活跃排序；是否允许多条「非置顶」纯 AI 会话由产品再定。
-- **点击置顶行** → 纯 AI 对话；**点击协作行** → 群聊详情（第一期可接受两种详情形态分离，不必强做同页 Tab）。
-- **「消息」页**职能倾向收窄为 **系统通知 + 订阅通知**；协作列表是否与会话列表完全合并需产品最终决策，避免双列表完全重复、文案分工不清。
+- **当前已实现（聊天 `chat`）**：**不采用置顶 AI 行**；默认 **落地页 + 底部「新建协作」** → 进入 AI 对话（协作内容优先在对话里产生，而非一点击就建空群）。会话列表页 **`pages/conversations`** 已去掉置顶「小陈助手」行；顶栏「新建协作」跳转 **`/pages/chat/chat?startAi=1`** 直接进入 AI。
+- **后续若做强会话列表**：**会话列表**（类比桌面端左侧栏；小程序用 **整页纵向列表**）；列表条目主要为 **协作会话**（绑定计划/群），按最近活跃排序。**不再假设「列表首条永久置顶 AI」**（与上述入口一致时可改为「新建」或落地页统一入口）。
+- **点击协作行** → 群聊详情；纯 AI 入口 → 落地页或 `startAi`。**「会话」收件箱页**职能与协作列表合并边界仍需产品最终决策。
 
 ### 8.4 云函数 / 联调提示（界面可选读）
 
-协作与通知仍依赖统一云函数 **`service`**：`createPlan`、`listChatRooms`、`getRoomMessages`、`sendRoomMessage`、`notifications`、`markNotifyRead` 等；封装见 `miniprogram/utils/cloud.js`。
+协作与通知仍依赖统一云函数 **`service`**：`createPlan`、`listChatRooms`、`getRoomMessages`、`sendRoomMessage`、`notifications`、`markNotifyRead`、`publicUserPreview` 等；封装见 `miniprogram/utils/cloud.js`。
+
+### 8.5 协作会话产品草案（扩展阅读）
+
+会话驱动的协作流程（首启种子草稿、空草稿去重、群内匹配卡片、对方预览主页与「邀请 TA」等）见 **[`SESSION_COLLAB_DESIGN.md`](./SESSION_COLLAB_DESIGN.md)**。
 
 ---
 
