@@ -1,0 +1,4 @@
+{
+  "description": "复制本文件为 project.private.config.json（已在 .gitignore），仅本机生效，可覆盖 appid 等；团队公共配置仍用 project.config.json。",
+  "appid": "wx在此替换为你的AppID"
+}

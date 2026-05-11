@@ -43,6 +43,8 @@
 - 文件：**`miniprogram/config/cloudEnv.js`**
 - 字段：**`envId`**：填云控制台「环境 ID」；**留空**则使用 `wx.cloud.DYNAMIC_CURRENT_ENV`（跟随开发者工具当前所选环境）。
 - `app.js` 里：`wx.cloud.init({ traceUser: true, env: cloudEnv.envId ? cloudEnv.envId : wx.cloud.DYNAMIC_CURRENT_ENV })`。
+- **AppID 本机覆盖（推荐）**：复制根目录 **`project.private.config.json.example`** 为 **`project.private.config.json`**（已 `.gitignore`），只在本机填写 `appid`；微信开发者工具会**自动合并**该文件，不必反复改公共的 `project.config.json`。
+- **一键装云函数依赖**：仓库根目录执行 **`npm run bootstrap`**，或 **`powershell -File scripts/bootstrap.ps1`**（会安装 `cloudfunctions/service` 依赖；若尚无 `project.private.config.json` 则从示例生成一份）。**上传云函数**仍须在开发者工具里对 `service` 点一次「上传并安装依赖」，云端非脚本可代劳。
 
 ### 2.3 调用协议（唯一入口）
 
