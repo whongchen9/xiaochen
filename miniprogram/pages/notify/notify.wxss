@@ -1,0 +1,108 @@
+/* 消息页：云端通知列表 */
+
+.msg-hub-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.msg-hub-body {
+  padding: 16rpx 16rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.msg-section {
+  margin-bottom: 32rpx;
+}
+
+.msg-section-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 8rpx 8rpx 16rpx;
+}
+
+.msg-section-hint {
+  display: block;
+  font-size: 22rpx;
+  color: var(--text-hint);
+  padding: 0 8rpx 12rpx;
+  line-height: 1.4;
+}
+
+.section-empty {
+  font-size: 26rpx;
+  color: var(--text-hint);
+  padding: 24rpx 16rpx 8rpx;
+  text-align: center;
+}
+
+.notify-list {
+  padding: 0;
+}
+
+.notify-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 24rpx;
+  margin-bottom: 12rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.notify-item:active {
+  opacity: 0.9;
+}
+
+.notify-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: transparent;
+  flex-shrink: 0;
+  margin-top: 8rpx;
+}
+
+.notify-dot.unread {
+  background: var(--danger);
+}
+
+.notify-body {
+  flex: 1;
+}
+
+.notify-title {
+  font-size: 28rpx;
+  color: var(--text-primary);
+  margin-bottom: 8rpx;
+  line-height: 1.5;
+}
+
+.notify-meta {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.notify-time {
+  font-size: 22rpx;
+  color: #bbb;
+}
+
+.tag {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.tag-gray {
+  background: #f0f0f0;
+  color: #888;
+}
+
+.tag-orange {
+  background: #fff3e0;
+  color: #c77600;
+}

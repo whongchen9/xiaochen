@@ -1,0 +1,72 @@
+<view class="page">
+  <view class="conversation-list">
+    <view class="pending-invite-bar" wx:if="{{pendingInviteCount > 0}}" bindtap="openPendingStrangerInvites">
+      <text class="pending-invite-text">待处理协作邀请 · {{pendingInviteCount}} 条</text>
+      <text class="pending-invite-arrow">去处理 ›</text>
+    </view>
+
+    <view class="conv-row conv-pinned" bindtap="openNewAiChat">
+      <view class="conv-avatar ai-avatar">
+        <text class="avatar-text">AI</text>
+      </view>
+      <view class="conv-info">
+        <view class="conv-top">
+          <text class="conv-name">新的会话</text>
+          <text class="badge-pinned">置顶</text>
+        </view>
+        <view class="conv-bottom">
+          <text class="conv-preview conv-preview-muted">点此开始新的会话</text>
+        </view>
+      </view>
+    </view>
+
+    <block wx:for="{{aiHistoryRows}}" wx:key="rowKey">
+      <view class="conv-row" bindtap="onRowTap" data-kind="ai" data-sessionid="{{item.sessionId}}" data-id="" data-title="">
+        <view class="conv-avatar ai-avatar">
+          <text class="avatar-text">AI</text>
+        </view>
+        <view class="conv-info">
+          <view class="conv-top">
+            <text class="conv-name">{{item.title}}</text>
+            <text class="conv-time">{{item.lastTime}}</text>
+          </view>
+          <view class="conv-bottom">
+            <text class="conv-preview">{{item.preview}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <block wx:for="{{roomRows}}" wx:key="rowKey">
+      <view class="conv-row" bindtap="onRowTap" data-kind="room" data-sessionid="" data-id="{{item.roomId}}" data-title="{{item.title}}">
+        <view class="conv-avatar room-avatar {{'room-color-' + item.colorIndex}}">
+          <text class="avatar-text">{{item.title.substring(0, 2)}}</text>
+        </view>
+        <view class="conv-info">
+          <view class="conv-top">
+            <view class="conv-top-main">
+              <text class="conv-name">{{item.title}}</text>
+              <text class="review-badge" wx:if="{{item.reviewPending}}">计划待审</text>
+            </view>
+            <text class="conv-time">{{item.lastTime}}</text>
+          </view>
+          <view class="conv-bottom">
+            <text class="conv-preview">{{item.preview}}</text>
+            <view class="unread-badge" wx:if="{{item.unread > 0}}">新</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view class="empty-state" wx:if="{{aiHistoryRows.length === 0 && roomRows.length === 0 && !loading && pendingInviteCount === 0}}">
+      <view class="empty-icon">💬</view>
+      <text class="empty-text">暂无会话</text>
+    </view>
+
+    <view class="page-loading" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+    </view>
+  </view>
+
+  <xiaochen-assistant id="xiaochen-assistant" />
+</view>

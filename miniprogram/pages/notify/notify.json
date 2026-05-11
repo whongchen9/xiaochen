@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "通知",
+  "usingComponents": {
+    "xiaochen-assistant": "/components/xiaochen-assistant/xiaochen-assistant"
+  }
+}

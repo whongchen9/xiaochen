@@ -1,0 +1,4 @@
+{
+  "desc": "即DAO",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

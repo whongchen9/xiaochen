@@ -1,0 +1,67 @@
+<!-- 消息：系统通知 + 订阅通知（协作群在首页「会话」） -->
+<view class="page msg-hub-page">
+  <view class="page-loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+  </view>
+
+  <!-- 不用 scroll-view + height:0：真机 + 自定义 Tab 时易出现可视高度为 0 的空白页 -->
+  <view wx:else class="msg-hub-body">
+    <view class="msg-section">
+      <text class="msg-section-title">系统通知</text>
+      <view class="notify-list" wx:if="{{systemNotifications.length > 0}}">
+        <view
+          class="notify-item"
+          wx:for="{{systemNotifications}}"
+          wx:key="id"
+          bindtap="onNotifyTap"
+          data-id="{{item.id}}"
+          data-link-room-id="{{item.linkRoomId}}"
+          data-link-plan-id="{{item.linkPlanId}}"
+          data-stranger-invite-id="{{item.strangerInviteId}}"
+          data-notify-kind="{{item.notifyKind}}"
+        >
+          <view class="notify-dot {{item.read ? '' : 'unread'}}"></view>
+          <view class="notify-body">
+            <view class="notify-title">{{item.title || item.content}}</view>
+            <view class="notify-meta">
+              <text class="tag tag-gray">{{item.categoryLabel}}</text>
+              <text class="notify-time">{{item.createTime}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="section-empty" wx:else>暂无系统通知</view>
+    </view>
+
+    <view class="msg-section">
+      <text class="msg-section-title">订阅通知</text>
+      <text class="msg-section-hint" wx:if="{{!notifyMatchEnabled}}">协作类提醒已在「设置」中关闭</text>
+      <view class="notify-list" wx:if="{{subscribeNotifications.length > 0}}">
+        <view
+          class="notify-item"
+          wx:for="{{subscribeNotifications}}"
+          wx:key="id"
+          bindtap="onNotifyTap"
+          data-id="{{item.id}}"
+          data-link-room-id="{{item.linkRoomId}}"
+          data-link-plan-id="{{item.linkPlanId}}"
+          data-stranger-invite-id="{{item.strangerInviteId}}"
+          data-notify-kind="{{item.notifyKind}}"
+        >
+          <view class="notify-dot {{item.read ? '' : 'unread'}}"></view>
+          <view class="notify-body">
+            <view class="notify-title">{{item.title || item.content}}</view>
+            <view class="notify-meta">
+              <text class="tag tag-orange">{{item.categoryLabel}}</text>
+              <text class="notify-time">{{item.createTime}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="section-empty" wx:elif="{{notifyMatchEnabled}}">暂无订阅类通知</view>
+      <view class="section-empty" wx:else>协作类提醒已关闭，此处不展示订阅通知</view>
+    </view>
+  </view>
+
+  <xiaochen-assistant id="xiaochen-assistant" />
+</view>

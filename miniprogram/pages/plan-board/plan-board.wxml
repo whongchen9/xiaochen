@@ -1,0 +1,180 @@
+<view class="page">
+  <!-- 计划配图：云端 xc_plans.coverImageFileId，发起人可更换 -->
+  <view wx:if="{{mode === 'active' && coverImageTempUrl}}" class="plan-cover-wrap">
+    <image
+      class="plan-cover-img"
+      src="{{coverImageTempUrl}}"
+      mode="widthFix"
+      bindtap="previewPlanCover"
+    />
+    <view wx:if="{{isPlanOwner}}" class="plan-cover-bar">
+      <text class="plan-cover-link" catchtap="choosePlanCover">更换配图</text>
+      <text class="plan-cover-link plan-cover-link-muted" catchtap="clearPlanCover">移除</text>
+    </view>
+  </view>
+  <view wx:elif="{{mode === 'active' && isPlanOwner}}" class="plan-cover-placeholder" bindtap="choosePlanCover">
+    <text class="plan-cover-placeholder-txt">+ 添加计划配图（可选）</text>
+  </view>
+
+  <!-- 白布约 50% 屏高：标题 / 摘要 / 正文分层，便于扫码阅读 -->
+  <view class="canvas-white">
+    <scroll-view scroll-y class="canvas-scroll">
+      <view class="plan-doc">
+        <view class="plan-doc-kicker-row">
+          <text class="plan-doc-kicker">协作计划书</text>
+          <text class="plan-doc-kicker-sub">对外可读口径</text>
+        </view>
+        <text class="plan-doc-title" selectable>{{digestTitle || '协作计划'}}</text>
+        <view wx:if="{{digestSummary}}" class="plan-doc-summary-card">
+          <text class="plan-doc-summary-label">摘要</text>
+          <text class="plan-doc-summary" selectable>{{digestSummary}}</text>
+        </view>
+        <view wx:if="{{planNarrative}}" class="plan-doc-body-block">
+          <text class="plan-doc-body-label">详细说明</text>
+          <text class="plan-doc-body" selectable>{{planNarrative}}</text>
+        </view>
+        <view wx:elif="{{mode === 'active' && !digestSummary && !planNarrative}}" class="plan-doc-footnote">
+          <text>暂未填写摘要；可在协作对话中完善计划书。</text>
+        </view>
+        <view wx:elif="{{!planBody}}" class="plan-doc-footnote">
+          <text>（暂无正文，请回到对话补充）</text>
+        </view>
+        <view wx:elif="{{mode === 'draft'}}" class="plan-doc-footnote">
+          <text>当前仅标题行；回到对话换行补充要点后，将在此展示详细说明。</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="toolbar">
+    <!-- 草稿：沿用「开关联动创建计划」 -->
+    <view wx:if="{{mode === 'draft'}}" class="match-switch-row">
+      <view class="match-switch-text">
+        <text class="match-switch-label">开启协作</text>
+        <text class="match-switch-sub">从当前计划书创建协作群</text>
+      </view>
+      <switch
+        checked="{{draftCreateChecked}}"
+        bindchange="onDraftCreateSwitch"
+        color="#2563eb"
+      />
+    </view>
+
+    <!-- 已建计划：陌生人池等收入「匹配设置」半屏 -->
+    <block wx:if="{{mode === 'active'}}">
+      <view
+        wx:if="{{isPlanOwner}}"
+        class="match-settings-entry"
+        bindtap="openMatchSheet"
+      >匹配设置（含陌生人协作池）</view>
+      <text wx:if="{{planBody}}" class="completeness-hint">计划完整度 {{planCompleteness}}%（约满 {{minStrangerCompleteness}}% 且已在匹配设置中开启协作池时，将自动尝试陌生人匹配）</text>
+      <view wx:if="{{strangerOutboundHint}}" class="stranger-outbound-hint">
+        <view class="stranger-outbound-text-wrap">
+          <text class="stranger-outbound-text">已向他人发出协作邀请，对方会在「通知」与协作会话中处理。</text>
+          <text class="stranger-outbound-link" bindtap="openNotifyFromPlan">去通知</text>
+        </view>
+        <text class="stranger-outbound-dismiss" bindtap="dismissStrangerOutboundHint">知道了</text>
+      </view>
+    </block>
+  </view>
+
+  <view class="rest">
+    <text class="rest-section-label">参与人员</text>
+    <view wx:if="{{participantRows.length > 0}}" class="participant-list">
+      <view class="participant-row" wx:for="{{participantRows}}" wx:key="openid">
+        <image wx:if="{{item.avatarUrl}}" class="row-avatar-img" src="{{item.avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="row-avatar-fallback">
+          <text class="row-avatar-fallback-txt">{{item.nickChar}}</text>
+        </view>
+        <view class="row-main" bindtap="onBriefTap" data-index="{{index}}">
+          <text class="row-brief">{{item.matchBrief}}</text>
+        </view>
+        <button
+          wx:if="{{item.showInvite}}"
+          class="row-invite-fab"
+          open-type="share"
+          data-room-id="{{roomId}}"
+          data-share-title="{{digestTitle}}"
+          hover-class="row-invite-fab-hover"
+        >
+          <text class="row-invite-fab-txt">邀</text>
+        </button>
+      </view>
+    </view>
+    <view wx:else class="participant-empty">
+      <text class="participant-empty-text">暂无</text>
+    </view>
+  </view>
+
+  <!-- 匹配设置半屏 -->
+  <view wx:if="{{showMatchSheet}}" class="match-sheet-mask" catchtap="closeMatchSheet" />
+  <view wx:if="{{showMatchSheet}}" class="match-sheet" catchtap="noop">
+    <view class="match-sheet-handle" />
+    <view class="match-sheet-header">
+      <text class="match-sheet-title">匹配设置</text>
+      <view class="match-sheet-close" bindtap="closeMatchSheet" hover-class="match-sheet-close-hover">关闭</view>
+    </view>
+    <text class="match-sheet-intro">以下选项仅影响本计划；未改动的项保持默认（群内参考开、自动组局开、先挑人关）。</text>
+
+    <view class="match-sheet-group">
+      <text class="match-sheet-group-label">本群</text>
+      <view class="match-sheet-row">
+        <view class="match-sheet-row-text">
+          <text class="match-sheet-row-title">群内撮合参考</text>
+          <text class="match-sheet-row-desc">向本群成员展示匹配度参考与摘要</text>
+        </view>
+        <switch checked="{{sheetMatchEnabled}}" bindchange="onSheetMatchEnabled" color="#2563eb" />
+      </view>
+    </view>
+
+    <view class="match-sheet-group">
+      <text class="match-sheet-group-label">陌生人协作</text>
+      <view class="match-sheet-row">
+        <view class="match-sheet-row-text">
+          <text class="match-sheet-row-title">陌生人协作池</text>
+          <text class="match-sheet-row-desc">开启后有机会与计划契合的陌生人自动组局；关闭则不参与池内匹配</text>
+        </view>
+        <switch checked="{{sheetStrangerPool}}" bindchange="onSheetStrangerPool" color="#2563eb" />
+      </view>
+      <view class="match-sheet-row">
+        <view class="match-sheet-row-text">
+          <text class="match-sheet-row-title">允许系统自动组局</text>
+          <text class="match-sheet-row-desc">双方均未开启「先挑人」且匹配度高时，系统可自动建群</text>
+        </view>
+        <switch checked="{{sheetAutoForm}}" bindchange="onSheetAutoForm" color="#2563eb" />
+      </view>
+      <view class="match-sheet-row">
+        <view class="match-sheet-row-text">
+          <text class="match-sheet-row-title">先挑人再邀请</text>
+          <text class="match-sheet-row-desc">开启后仅主动邀请，不自动与陌生人组局</text>
+        </view>
+        <switch checked="{{sheetPickBefore}}" bindchange="onSheetPickBefore" color="#2563eb" />
+      </view>
+      <view class="match-sheet-row match-sheet-row-slider">
+        <view class="match-sheet-row-text">
+          <text class="match-sheet-row-title">头像揭晓等待（秒）</text>
+          <text class="match-sheet-row-desc">双方自动匹配时取两计划配置中较大值（15–600 秒，默认 60）</text>
+        </view>
+        <slider
+          min="15"
+          max="600"
+          step="15"
+          value="{{sheetRevealSec}}"
+          show-value
+          activeColor="#2563eb"
+          bindchange="onSheetRevealChange"
+        />
+      </view>
+    </view>
+
+    <view class="match-sheet-actions">
+      <button class="match-sheet-btn match-sheet-btn-ghost" bindtap="closeMatchSheet">取消</button>
+      <button class="match-sheet-btn match-sheet-btn-primary" bindtap="saveMatchSheet">保存</button>
+    </view>
+  </view>
+
+  <view class="plan-pending-stranger" wx:if="{{mode === 'active' && pendingStrangerRoomId}}">
+    <text class="plan-pending-stranger-txt">陌生人协作群已创建，可进入会话页查看匹配卡片，或直接进入群聊。</text>
+    <button class="plan-pending-stranger-btn" type="primary" bindtap="enterPendingStrangerFromPlan">进入协作群</button>
+  </view>
+</view>

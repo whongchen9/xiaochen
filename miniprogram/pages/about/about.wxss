@@ -1,0 +1,49 @@
+.page-about-scroll {
+  height: 100vh;
+  background: var(--bg-page);
+}
+
+.page-about {
+  padding: 24rpx 32rpx 80rpx;
+  box-sizing: border-box;
+}
+
+.about-lead {
+  font-size: 30rpx;
+  line-height: 1.65;
+  color: var(--text-primary);
+  margin-bottom: 28rpx;
+}
+
+.about-section {
+  margin-bottom: 36rpx;
+}
+
+.about-h2 {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12rpx;
+}
+
+.about-p {
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 10rpx;
+}
+
+.about-muted {
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+  margin-top: 8rpx;
+}
+
+.about-bullet {
+  font-size: 26rpx;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  margin-bottom: 10rpx;
+  padding-left: 4rpx;
+}
