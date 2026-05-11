@@ -1,6 +1,4 @@
 {
   "navigationBarTitleText": "发现",
-  "usingComponents": {
-    "xiaochen-assistant": "/components/xiaochen-assistant/xiaochen-assistant"
-  }
+  "usingComponents": {}
 }

@@ -68,6 +68,4 @@
 
     <view class="discover-bottom-spacer" />
   </scroll-view>
-
-  <xiaochen-assistant id="xiaochen-assistant" />
 </view>

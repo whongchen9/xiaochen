@@ -20,7 +20,7 @@
     <view class="chat-landing-body">
       <text class="chat-landing-kicker">{{layoutDiscoverMode ? '发现页' : '协作'}}</text>
       <text class="chat-landing-title">{{layoutDiscoverMode ? '用对话调整版面' : '先把需求说清楚'}}</text>
-      <text class="chat-landing-desc">{{layoutDiscoverMode ? '进入后直接在底部输入你的排版想法；保存后返回「发现」即可预览。' : '和小陈助手对话整理要点；需要时打开右下角「P」查看计划书。陌生人匹配在计划书与通知里推进。'}}</text>
+      <text class="chat-landing-desc">{{layoutDiscoverMode ? '进入后直接在底部输入你的排版想法；保存后返回「发现」即可预览。' : '在对话里整理要点；需要时打开右下角「P」查看计划书。陌生人匹配在计划书与通知里推进。'}}</text>
     </view>
     <view class="chat-landing-footer">
       <view class="chat-landing-btn" bindtap="onLandingStart" hover-class="chat-landing-btn-hover" hover-stay-time="80">

@@ -1,5 +1,2 @@
 <!--pages/friend-chat/friend-chat.wxml-->
-<view class="page">
-  <text>pages/friend-chat/friend-chat.wxml</text>
-  <xiaochen-assistant id="xiaochen-assistant" />
-</view>
+<text>pages/friend-chat/friend-chat.wxml</text>

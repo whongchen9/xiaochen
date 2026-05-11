@@ -98,18 +98,6 @@ Page({
       this._layoutTarget = 'discover';
       this.setData({ layoutDiscoverMode: true });
       wx.setNavigationBarTitle({ title: '发现页 · 布局助手' });
-      try {
-        wx.removeStorageSync('xiaochen_assistant_input');
-      } catch (e0) {}
-    } else {
-      try {
-        const xcIn = wx.getStorageSync('xiaochen_assistant_input');
-        if (xcIn) {
-          wx.removeStorageSync('xiaochen_assistant_input');
-          const s = String(xcIn).trim();
-          if (s) this._prefillFromXiaochen = s;
-        }
-      } catch (e1) {}
     }
     if (q.aiSessionId) {
       const sid = String(q.aiSessionId).trim();
@@ -174,20 +162,6 @@ Page({
     }
     this.restoreStrangerDockFromStorage();
     void this.refreshPendingStrangerInvites();
-
-    if (!this.data.activeRoomId && this._prefillFromXiaochen && this._layoutTarget !== 'discover') {
-      const t = this._prefillFromXiaochen;
-      this._prefillFromXiaochen = '';
-      setTimeout(() => {
-        if (this.data.activeRoomId) return;
-        if (!this.data.aiCollaborationStarted) this.startCollaborationChat();
-        const run = () => {
-          if (!this.data.activeRoomId && this.data.aiCollaborationStarted) this.sendMessage(t);
-        };
-        if (this.data.aiCollaborationStarted) run();
-        else setTimeout(run, 280);
-      }, 420);
-    }
   },
 
   /**
