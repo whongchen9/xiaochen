@@ -15,12 +15,12 @@
 | **`token_data`** | `miniprogram/utils/token-manager.js`（`CONFIG.STORAGE_KEY`） | **AI 对话次数（本地计量）**：余额、是否 VIP、每日重置、看广告奖励等。**不是**微信 access_token，也**不是**云开发票据；广告/VIP 开通为 **演示逻辑**，见 §2.6。 |
 | **`token`** | （历史预留）曾计划在独立 HTTP 客户端中作为 Bearer；**当前仓库已移除未使用的 `utils/request.js`**，亦无 `setStorageSync('token')`。 |
 | **`openid`** | `app.js` → `login` 成功回调 | 云函数返回的 openid 缓存，便于调试或扩展。 |
-| **`userInfo`** | `app.js`、`syncUserProfile`、`settings`、`xiaochen-assistant` 等 | `{ nickname, avatar, phone }` 等展示与表单默认值；与云 `login` / `savePhone` 同步。 |
+| **`userInfo`** | `app.js`、`syncUserProfile`、`settings` 等 | `{ nickname, avatar, phone }` 等展示与表单默认值；与云 `login` / `savePhone` 同步。 |
 | **`setting_notify_order`** / **`setting_notify_match`** | `pages/settings/settings.js` | 布尔；通知页 `notify` 按类别过滤展示。 |
-| **`xiaochen_assistant_input`** | `match.js`、`xiaochen-assistant` 等 | 跳转到聊天页时预填并自动发送的文案（读完即删）。 |
+| **`xiaochen_assistant_input`** | （历史）曾用于跳转聊天预填；**已废弃**，`chat.js` 不再读取。 |
 | **`consult_post_draft`** | （已下线帖子详情页）历史键名；协作群主线下可不使用。 |
 | **`chat_temp_image`** | `pages/chat/chat.js` | 选图后的临时路径占位（与 `[图片]` 文案配合，发送逻辑以页面为准）。 |
-| **`addressList`** | `xiaochen-assistant.js` | 组件内维护的地址列表缓存（若与云地址库并存，需注意数据源一致性）。 |
+| **`addressList`** | （历史）组件内地址缓存 | 若仍存在键名，以各页实际逻辑为准。 |
 | **`userBadges`** | `profile.js` | 个人中心徽章类本地状态（若有）。 |
 | **`xc_room_last_seen_<roomId>`** | `pages/chat/chat.js` | 离开群聊页时写入的本地时间戳（毫秒），用于 `conversations` 列表推断「有新消息」圆点（单机、近似）。 |
 
@@ -85,50 +85,10 @@ await call('chat', { message: '你好', history: [] });
 
 ---
 
-## 3. 自定义组件：`xiaochen-assistant`（小陈助手）
+## 3. 小陈助手组件（`xiaochen-assistant`）— 当前已下线
 
-### 3.1 路径与性质
-
-- 目录：`miniprogram/components/xiaochen-assistant/`
-- 配置：`xiaochen-assistant.json` 中 `"component": true`。
-- 功能概要：可拖拽悬浮按钮 + 弹层内对话/撮合要点预填/资料等；内部同样使用 **`require('../../utils/cloud')` 的 `call`**。
-
-### 3.2 页面注册方式
-
-在页面 **`*.json`** 中声明：
-
-```json
-{
-  "usingComponents": {
-    "xiaochen-assistant": "/components/xiaochen-assistant/xiaochen-assistant"
-  }
-}
-```
-
-在 **`*.wxml`** 中使用标签（短横线命名）：
-
-```xml
-<xiaochen-assistant />
-```
-
-需要 **脚本调用** 实例方法时（如 `openDialog`），必须带 **`id`**：
-
-```xml
-<xiaochen-assistant id="xiaochen-assistant" />
-```
-
-```js
-const assistant = this.selectComponent('#xiaochen-assistant');
-if (assistant) assistant.openDialog();
-```
-
-**当前约定**：需要脚本唤起助手（如 `openDialog`）的页面使用带 **`id`** 的写法；仅需点击悬浮钮的页面可省略 **`id`**（如 `profile`、`notify`、**`conversations`（首页）** 等，以各页 `*.wxml` 为准）。
-
-### 3.3 与聊天主页的关系
-
-- **`pages/conversations/conversations`**（`app.json` 首页）已挂载 **`xiaochen-assistant`**，打开小程序即可用小陈助手。
-- **`pages/chat/chat`** 的 `chat.json` **未**注册 `xiaochen-assistant`（进入全屏聊天页时避免与悬浮助手叠两层）。
-- 跨页唤起全文对话：可 **`wx.setStorageSync('xiaochen_assistant_input', '...')`** 后 **`wx.reLaunch({ url: '/pages/chat/chat' })`**（见 `chat.js` `onLoad` 读取逻辑）。
+- **产品界面**：各 Tab 页 **不再挂载** `xiaochen-assistant`；源码目录 `miniprogram/components/xiaochen-assistant/` **已删除**，若需恢复可从 Git 历史找回。
+- **`xiaochen_assistant_input`**：`pages/chat/chat.js` **已不再读取**该键；历史文档中关于「预填后跳转聊天」的说明作废。
 
 ---
 
@@ -145,7 +105,7 @@ if (assistant) assistant.openDialog();
    在云控制台「云端测试」直接跑云函数时没有小程序上下文，会返回 `NO_OPENID`。真机/模拟器内需保证 `wx.cloud.init` 与环境一致；本地调试云函数时勾选「模拟小程序调用」。
 
 2. **AI Token（`token_data`）扣次时机**  
-   **`pages/chat/chat`** 与 **`xiaochen-assistant`** 均在 **`call('chat')` 成功返回回复之后** 调用 `tokenMgr.consume()`；失败则不扣次。若后续改为流式或预扣费，需单独设计回滚。
+   **`pages/chat/chat`** 在 **`call('chat')` 成功返回回复之后** 调用 `tokenMgr.consume()`；失败则不扣次。若后续改为流式或预扣费，需单独设计回滚。
 
 3. **Storage 键 `token`（HTTP Bearer）**  
    当前仓库无 `setStorageSync('token')`；仅在使用自建 HTTP 客户端时再引入。
@@ -174,7 +134,7 @@ if (assistant) assistant.openDialog();
 3. `miniprogram/utils/cloud.js`  
 4. `cloudfunctions/service/index.js`（`switch (action)`）  
 5. `miniprogram/app.js`（云初始化、静默登录）  
-6. 涉及页面：`pages/chat/chat.js`、`components/xiaochen-assistant/xiaochen-assistant.js`
+6. 涉及页面：`pages/chat/chat.js`
 
 ---
 
