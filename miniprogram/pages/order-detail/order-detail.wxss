@@ -1,0 +1,65 @@
+.page {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  border: 1rpx solid #eee;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+}
+
+.row:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  color: #999;
+  flex-shrink: 0;
+  margin-right: 24rpx;
+}
+
+.value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+.muted {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.status {
+  color: #2f6cf6;
+  font-weight: 600;
+}
+
+.total {
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.price {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #2f6cf6;
+}
+
+.empty {
+  padding: 80rpx;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}

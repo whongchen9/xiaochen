@@ -1,0 +1,36 @@
+<!-- 订单列表 -->
+<view class="page">
+  <view class="tabs">
+    <view class="tab {{activeTab === 'all' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+    <view class="tab {{activeTab === 'ongoing' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="ongoing">进行中</view>
+    <view class="tab {{activeTab === 'done' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="done">已完成</view>
+  </view>
+
+  <view class="empty-state" wx:if="{{filteredOrders.length === 0}}">
+    <view class="empty-icon">📋</view>
+    <view class="empty-text">暂无订单</view>
+    <view class="empty-hint">去首页找助手帮忙吧</view>
+  </view>
+
+  <scroll-view class="order-list" scroll-y="true" wx:else>
+    <view class="order-card" wx:for="{{filteredOrders}}" wx:key="id" bindtap="viewOrderDetail" data-order="{{item}}">
+      <view class="order-top">
+        <view class="order-tags">
+          <text class="tag tag-blue">{{item.serviceType}}</text>
+          <text class="tag tag-orange" wx:if="{{item.myRole === 'runner'}}">我接的单</text>
+          <text class="order-no">#{{item.orderNo}}</text>
+        </view>
+        <text class="order-status status-{{item.statusKey}}">{{item.statusText}}</text>
+      </view>
+      <view class="order-route">
+        <view class="route-item"><view class="route-dot start"></view><text class="route-text">{{item.startAddr}}</text></view>
+        <view class="route-line"></view>
+        <view class="route-item"><view class="route-dot end"></view><text class="route-text">{{item.endAddr}}</text></view>
+      </view>
+      <view class="order-bottom">
+        <text class="order-time">{{item.createTime}}</text>
+        <text class="order-amount">¥{{item.price}}</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>
