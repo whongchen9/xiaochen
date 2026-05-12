@@ -10,6 +10,7 @@
  */
 const cloud = require('wx-server-sdk');
 const { tryLlmChat, tryLlmMergePlanNotebook, tryLlmPlanDraftFromChat, tryLlmDiscoverLayout, postJson } = require('./llm');
+const { collections, cs } = require('./config');
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV
@@ -21,21 +22,7 @@ const { fmtTime } = require('./lib/fmt');
 const security = require('./lib/security');
 
 /** 即DAO专用集合（勿与撮合集市默认集合混名） */
-const XC = {
-  USERS: 'xc_users',
-  NOTIFICATIONS: 'xc_notifications',
-  ADDRESSES: 'xc_addresses',
-  RATINGS: 'xc_ratings',
-  PLANS: 'xc_plans',
-  CHAT_ROOMS: 'xc_chat_rooms',
-  CHAT_MESSAGES: 'xc_chat_messages',
-  ROOM_CS: 'xc_room_cs',
-  JOIN_REQUESTS: 'xc_room_join_requests',
-  META: 'xc_meta',
-  STRANGER_MATCH_INVITES: 'xc_stranger_match_invites'
-};
-
-const CS_OWNER_OFFLINE_MS = 3 * 60 * 1000;
+const XC = collections;
 
 function wxMsgSecCheckOrSkip(content) {
   return security.wxMsgSecCheckOrSkip(cloud, content);
@@ -51,8 +38,7 @@ const collab = createCollabHandlers({
   XC,
   fmtTime,
   tryLlmChat,
-  wxMsgSecCheckOrSkip,
-  CS_OWNER_OFFLINE_MS
+  wxMsgSecCheckOrSkip
 });
 const strangerMatch = createStrangerMatchHandlers({ db, _, XC, fmtTime });
 const agentChat = createAgentChat({ db, _, XC, postJson });

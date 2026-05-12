@@ -1,15 +1,14 @@
 /**
  * 协作计划 / 群聊 / 离线客服相关 handlers（由 index 注入 db、XC 等）
  */
+const { roughFitScore, clamp, batchGetDocs } = require('../lib/utils');
+const { admin, cs, match: matchConfig } = require('../config');
+
 module.exports = function createCollabHandlers(deps) {
-  const { db, _, cloud, XC, fmtTime, tryLlmChat, wxMsgSecCheckOrSkip, CS_OWNER_OFFLINE_MS } = deps;
+  const { db, _, cloud, XC, fmtTime, tryLlmChat, wxMsgSecCheckOrSkip } = deps;
 
   function parsePlanAdmins() {
-    const raw = process.env.PLAN_ADMIN_OPENIDS || '';
-    return raw
-      .split(/[,;\s]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
+    return admin.planAdminOpenids;
   }
 
   async function syncPlanCardFields(planId, patch) {
@@ -98,11 +97,9 @@ module.exports = function createCollabHandlers(deps) {
   }
 
   function clampStrangerRevealSeconds(raw) {
-    const envN = Number(process.env.STRANGER_MATCH_REVEAL_SECONDS);
-    const def = Number.isFinite(envN) && envN > 0 ? Math.round(envN) : 60;
+    const def = matchConfig.revealSeconds;
     const n = Number(raw);
-    const x = Number.isFinite(n) && n > 0 ? Math.round(n) : def;
-    return Math.min(600, Math.max(15, x));
+    return clamp(n, 15, 600, def);
   }
 
   /** 未写字段视为默认：与产品「默认全开（除先挑人）」一致 */
@@ -359,26 +356,6 @@ module.exports = function createCollabHandlers(deps) {
   }
 
   const MATCH_BOARD_PAGE = 3;
-
-  function roughFitScore(planHaystack, profileText) {
-    const a = String(planHaystack || '').replace(/\s/g, '');
-    const b = String(profileText || '').replace(/\s/g, '');
-    if (!a.length || !b.length) return 0;
-    const freq = {};
-    for (let i = 0; i < a.length; i++) {
-      const ch = a[i];
-      freq[ch] = (freq[ch] || 0) + 1;
-    }
-    let score = 0;
-    for (let i = 0; i < b.length; i++) {
-      const ch = b[i];
-      if (freq[ch]) {
-        score++;
-        freq[ch]--;
-      }
-    }
-    return score;
-  }
 
   function buildMatchReasonLine(planHaystack, profileJoin, fitScore, intentLabel) {
     const p = String(planHaystack || '').replace(/\s/g, '');
@@ -895,7 +872,7 @@ module.exports = function createCollabHandlers(deps) {
       if (!cs || !cs.assistOfflineEnabled) return;
 
       const lastSeen = cs.ownerLastSeenAt ? new Date(cs.ownerLastSeenAt).getTime() : 0;
-      if (lastSeen && Date.now() - lastSeen < CS_OWNER_OFFLINE_MS) return;
+      if (lastSeen && Date.now() - lastSeen < cs.ownerOfflineMs) return;
 
       const ctx = String(cs.aiContextText || '').slice(0, 5000);
       const prompt = `你是微信小程序「即DAO」里的「协作助手」，正在临时替协作项目主理人回复群里的提问。\n\n主理人先前与 AI 整理的项目要点（摘录，可能不完整）：\n${ctx || '（暂无摘录）'}\n\n群成员刚发送的消息：${userContent}\n\n请用简短、友好、口语化的中文回复；不得编造价格或承诺；不清楚时请说明会请主理人上线后再答复。`;

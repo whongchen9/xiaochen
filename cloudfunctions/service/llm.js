@@ -3,6 +3,7 @@
  * 在云开发控制台为本云函数配置环境变量后生效，见 README。
  */
 const https = require('https');
+const { llm: llmConfig } = require('./config');
 
 function postJson(urlString, headers, jsonBody) {
   const body = JSON.stringify(jsonBody);
@@ -68,8 +69,7 @@ const DEFAULT_CHAT_SYSTEM_PROMPT = `你在微信小程序「即DAO」的聊天�
  * 若需紧急绕过控制台里删不掉的旧 LLM_SYSTEM_PROMPT，可设 LLM_FORCE_DEFAULT_SYSTEM=1。
  */
 function getEffectiveChatSystemPrompt() {
-  const force = process.env.LLM_FORCE_DEFAULT_SYSTEM;
-  if (force === '1' || force === 'true' || force === 'yes') {
+  if (llmConfig.forceDefaultSystem) {
     return DEFAULT_CHAT_SYSTEM_PROMPT;
   }
   const raw = process.env.LLM_SYSTEM_PROMPT;
@@ -86,12 +86,11 @@ function getEffectiveChatSystemPrompt() {
  * @returns {Promise<string>} 空字符串表示未配置 Key、调用失败或不支持识图
  */
 async function tryLlmChat(userMessage, history, options) {
-  const key = process.env.LLM_API_KEY;
+  const key = llmConfig.apiKey;
   if (!key || !String(key).trim()) return '';
 
-  const apiUrl =
-    process.env.LLM_API_URL || 'https://api.deepseek.com/v1/chat/completions';
-  const model = process.env.LLM_MODEL || 'deepseek-chat';
+  const apiUrl = llmConfig.apiUrl;
+  const model = llmConfig.model;
 
   const system = getEffectiveChatSystemPrompt();
 
@@ -131,8 +130,8 @@ async function tryLlmChat(userMessage, history, options) {
     const data = await postJson(apiUrl, { Authorization: 'Bearer ' + key.trim() }, {
       model,
       messages,
-      temperature: Number(process.env.LLM_CHAT_TEMPERATURE || process.env.LLM_TEMPERATURE) || 0.65,
-      max_tokens: Number(process.env.LLM_CHAT_MAX_TOKENS || process.env.LLM_MAX_TOKENS) || 900
+      temperature: llmConfig.temperature,
+      max_tokens: llmConfig.maxTokens
     });
 
     const text =
